@@ -17,12 +17,26 @@ export default function SignupPage() {
     setError(null)
     setLoading(true)
 
-    // Debug: Check env vars
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    console.log('URL length:', url?.length, 'URL:', url)
-    console.log('Key length:', key?.length, 'Key ends with:', key?.slice(-10))
-    console.log('Key char codes (last 5):', key?.slice(-5).split('').map(c => c.charCodeAt(0)))
+    // Debug: Test raw fetch first
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+    try {
+      console.log('Testing raw fetch...')
+      const testResponse = await fetch(`${url}/auth/v1/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': key,
+        },
+        body: JSON.stringify({ email, password }),
+      })
+      console.log('Raw fetch status:', testResponse.status)
+      const data = await testResponse.json()
+      console.log('Raw fetch response:', data)
+    } catch (fetchErr) {
+      console.error('Raw fetch error:', fetchErr)
+    }
 
     const supabase = createClient()
     const { error } = await supabase.auth.signUp({
