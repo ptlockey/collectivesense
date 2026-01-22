@@ -43,21 +43,33 @@ export default function SignupPage() {
       console.error('Test 2 failed:', e)
     }
 
-    // Test 3: With apikey header
-    try {
-      console.log('Test 3: With apikey header...')
-      console.log('Key first 20 chars:', key.substring(0, 20))
-      const r3 = await fetch(`${url}/auth/v1/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': key,
-        },
-        body: JSON.stringify({ email, password }),
-      })
-      console.log('Test 3 status:', r3.status)
-    } catch (e) {
-      console.error('Test 3 failed:', e)
+    // Test 3: Scan key for invalid characters
+    console.log('Test 3: Scanning key for invalid chars...')
+    const validChars = /^[A-Za-z0-9._-]+$/
+    if (!validChars.test(key)) {
+      console.log('Key contains invalid characters!')
+      for (let i = 0; i < key.length; i++) {
+        const char = key[i]
+        const code = key.charCodeAt(i)
+        if (!/[A-Za-z0-9._-]/.test(char)) {
+          console.log(`Invalid char at position ${i}: "${char}" (code: ${code})`)
+        }
+      }
+    } else {
+      console.log('Key chars look valid, trying fetch...')
+      try {
+        const r3 = await fetch(`${url}/auth/v1/signup`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': key,
+          },
+          body: JSON.stringify({ email, password }),
+        })
+        console.log('Test 3 status:', r3.status)
+      } catch (e) {
+        console.error('Test 3 failed:', e)
+      }
     }
 
     const supabase = createClient()
