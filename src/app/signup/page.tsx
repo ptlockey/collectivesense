@@ -17,6 +17,10 @@ export default function SignupPage() {
     setError(null)
     setLoading(true)
 
+    // Debug: Check env vars
+    console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
+    console.log('Anon key starts with:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 10))
+
     const supabase = createClient()
     const { error } = await supabase.auth.signUp({
       email,
