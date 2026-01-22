@@ -18,8 +18,11 @@ export default function SignupPage() {
     setLoading(true)
 
     // Debug: Check env vars
-    console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
-    console.log('Anon key starts with:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 10))
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    console.log('URL length:', url?.length, 'URL:', url)
+    console.log('Key length:', key?.length, 'Key ends with:', key?.slice(-10))
+    console.log('Key char codes (last 5):', key?.slice(-5).split('').map(c => c.charCodeAt(0)))
 
     const supabase = createClient()
     const { error } = await supabase.auth.signUp({
