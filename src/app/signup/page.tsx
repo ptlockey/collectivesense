@@ -17,61 +17,6 @@ export default function SignupPage() {
     setError(null)
     setLoading(true)
 
-    // Debug: Test step by step
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-    // Test 1: Simple fetch without auth
-    try {
-      console.log('Test 1: Simple GET...')
-      const r1 = await fetch('https://httpbin.org/get')
-      console.log('Test 1 passed:', r1.status)
-    } catch (e) {
-      console.error('Test 1 failed:', e)
-    }
-
-    // Test 2: Fetch with Content-Type only
-    try {
-      console.log('Test 2: POST with Content-Type only...')
-      const r2 = await fetch(`${url}/auth/v1/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-      console.log('Test 2 status:', r2.status)
-    } catch (e) {
-      console.error('Test 2 failed:', e)
-    }
-
-    // Test 3: Scan key for invalid characters
-    console.log('Test 3: Scanning key for invalid chars...')
-    const validChars = /^[A-Za-z0-9._-]+$/
-    if (!validChars.test(key)) {
-      console.log('Key contains invalid characters!')
-      for (let i = 0; i < key.length; i++) {
-        const char = key[i]
-        const code = key.charCodeAt(i)
-        if (!/[A-Za-z0-9._-]/.test(char)) {
-          console.log(`Invalid char at position ${i}: "${char}" (code: ${code})`)
-        }
-      }
-    } else {
-      console.log('Key chars look valid, trying fetch...')
-      try {
-        const r3 = await fetch(`${url}/auth/v1/signup`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': key,
-          },
-          body: JSON.stringify({ email, password }),
-        })
-        console.log('Test 3 status:', r3.status)
-      } catch (e) {
-        console.error('Test 3 failed:', e)
-      }
-    }
-
     const supabase = createClient()
     const { error } = await supabase.auth.signUp({
       email,
