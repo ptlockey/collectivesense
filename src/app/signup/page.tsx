@@ -17,13 +17,37 @@ export default function SignupPage() {
     setError(null)
     setLoading(true)
 
-    // Debug: Test raw fetch first
+    // Debug: Test step by step
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
+    // Test 1: Simple fetch without auth
     try {
-      console.log('Testing raw fetch...')
-      const testResponse = await fetch(`${url}/auth/v1/signup`, {
+      console.log('Test 1: Simple GET...')
+      const r1 = await fetch('https://httpbin.org/get')
+      console.log('Test 1 passed:', r1.status)
+    } catch (e) {
+      console.error('Test 1 failed:', e)
+    }
+
+    // Test 2: Fetch with Content-Type only
+    try {
+      console.log('Test 2: POST with Content-Type only...')
+      const r2 = await fetch(`${url}/auth/v1/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      console.log('Test 2 status:', r2.status)
+    } catch (e) {
+      console.error('Test 2 failed:', e)
+    }
+
+    // Test 3: With apikey header
+    try {
+      console.log('Test 3: With apikey header...')
+      console.log('Key first 20 chars:', key.substring(0, 20))
+      const r3 = await fetch(`${url}/auth/v1/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -31,11 +55,9 @@ export default function SignupPage() {
         },
         body: JSON.stringify({ email, password }),
       })
-      console.log('Raw fetch status:', testResponse.status)
-      const data = await testResponse.json()
-      console.log('Raw fetch response:', data)
-    } catch (fetchErr) {
-      console.error('Raw fetch error:', fetchErr)
+      console.log('Test 3 status:', r3.status)
+    } catch (e) {
+      console.error('Test 3 failed:', e)
     }
 
     const supabase = createClient()
