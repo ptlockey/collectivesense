@@ -11,7 +11,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'Collective Wisdom',
+  title: 'Collective Sense',
   description: 'Crowdsourced problem-solving through synthesised collective wisdom',
 }
 
@@ -44,7 +44,7 @@ export default async function RootLayout({
           {children}
         </main>
         <footer className="border-t border-border mt-16 py-8 text-center text-sm text-muted-foreground">
-          <p>Collective Wisdom - helping strangers, together</p>
+          <p>Collective Sense - wisdom from many, not just one</p>
         </footer>
       </body>
     </html>

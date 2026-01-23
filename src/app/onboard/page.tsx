@@ -43,7 +43,7 @@ export default function OnboardPage() {
   return (
     <div className="max-w-2xl mx-auto py-12">
       <h1 className="text-2xl font-semibold mb-8">
-        Welcome to Collective Wisdom
+        Welcome to Collective Sense
       </h1>
 
       {/* How it works */}
@@ -144,7 +144,7 @@ export default function OnboardPage() {
         disabled={!confirmed || loading}
         className="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {loading ? 'Entering...' : 'Enter Collective Wisdom'}
+        {loading ? 'Entering...' : 'Enter Collective Sense'}
       </button>
     </div>
   )

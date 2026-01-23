@@ -27,9 +27,11 @@ function LandingPage() {
           A different kind of advice
         </div>
         <h1 className="text-5xl font-semibold text-foreground mb-6 leading-tight">
-          Wisdom from many,<br />
-          <span className="text-primary">not just one</span>
+          Collective Sense
         </h1>
+        <p className="text-lg text-secondary mb-4">
+          Wisdom from many, not just one
+        </p>
         <p className="text-xl text-secondary max-w-xl mx-auto mb-10 leading-relaxed">
           Share what you&apos;re facing. Receive synthesised insights from people who&apos;ve been there.
           No individual responses. No ego. Just collective wisdom.

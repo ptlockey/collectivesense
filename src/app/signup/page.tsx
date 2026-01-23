@@ -38,7 +38,7 @@ export default function SignupPage() {
 
   return (
     <div className="max-w-md mx-auto py-12">
-      <h1 className="text-2xl font-semibold mb-2">Join Collective Wisdom</h1>
+      <h1 className="text-2xl font-semibold mb-2">Join Collective Sense</h1>
       <p className="text-secondary mb-8">
         Help others and receive help in return
       </p>

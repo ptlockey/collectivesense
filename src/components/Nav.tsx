@@ -28,7 +28,7 @@ export function Nav({ user }: NavProps) {
             href="/"
             className="text-lg font-semibold text-primary hover:text-primary-dark"
           >
-            Collective Wisdom
+            Collective Sense
           </Link>
 
           {/* Navigation Links */}
