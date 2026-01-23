@@ -1,36 +1,46 @@
 @import "tailwindcss";
 
 :root {
-  /* Calm, warm color palette */
-  --background: #FAF9F6;
-  --foreground: #2C3E50;
+  /* Warm, friendly color palette */
+  --background: #FFFBF7;
+  --foreground: #3D3D3D;
 
-  /* Primary - Deep teal */
-  --primary: #2D6A6A;
-  --primary-light: #3D8A8A;
-  --primary-dark: #1D4A4A;
+  /* Primary - Warm coral/terracotta */
+  --primary: #E07A5F;
+  --primary-light: #F0A090;
+  --primary-dark: #C96A4F;
 
-  /* Secondary - Warm grey */
-  --secondary: #6B7280;
-  --secondary-light: #9CA3AF;
-  --secondary-dark: #4B5563;
+  /* Secondary - Soft warm grey */
+  --secondary: #8D99AE;
+  --secondary-light: #B0B8C5;
+  --secondary-dark: #6B7280;
 
-  /* Accent - Warm cream */
-  --accent: #F5F0E8;
-  --accent-dark: #E8E0D0;
+  /* Accent - Warm cream/peach */
+  --accent: #FFF1E6;
+  --accent-dark: #FFE4D6;
+
+  /* Highlight - Soft sage green for variety */
+  --highlight: #81B29A;
+  --highlight-light: #A8D5BA;
 
   /* Muted - For less prominent elements */
-  --muted: #F3F4F6;
+  --muted: #F8F6F4;
   --muted-foreground: #6B7280;
 
-  /* Borders */
-  --border: #E5E7EB;
-  --border-dark: #D1D5DB;
+  /* Borders - Softer */
+  --border: #E8E4E0;
+  --border-dark: #D5CFC8;
 
-  /* Success/Warning - muted, not alarming */
-  --success: #4A7C59;
-  --warning: #B8860B;
-  --error: #8B4A4A;
+  /* Status colors - warm and gentle */
+  --success: #81B29A;
+  --warning: #F2CC8F;
+  --error: #E07A5F;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.04), 0 4px 6px rgba(0, 0, 0, 0.06);
+  --shadow-glow: 0 0 20px rgba(224, 122, 95, 0.15);
 }
 
 @theme inline {
@@ -44,6 +54,8 @@
   --color-secondary-dark: var(--secondary-dark);
   --color-accent: var(--accent);
   --color-accent-dark: var(--accent-dark);
+  --color-highlight: var(--highlight);
+  --color-highlight-light: var(--highlight-light);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
@@ -52,29 +64,46 @@
   --color-warning: var(--warning);
   --color-error: var(--error);
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --radius-soft: 16px;
+  --radius-card: 20px;
+  --radius-button: 12px;
 }
-
-/* No dark mode for now - keeping the calm, warm aesthetic */
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  line-height: 1.6;
+  line-height: 1.7;
+  letter-spacing: -0.01em;
 }
 
-/* Focus states - visible but not jarring */
+/* Subtle background pattern */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(224, 122, 95, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(129, 178, 154, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Focus states - visible but warm */
 *:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--primary-light);
   outline-offset: 2px;
 }
 
 /* Smooth transitions for interactive elements */
 button, a, input, textarea, select {
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
-/* Custom scrollbar for a calmer experience */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -82,13 +111,130 @@ button, a, input, textarea, select {
 
 ::-webkit-scrollbar-track {
   background: var(--muted);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--secondary-light);
+  background: var(--border-dark);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--secondary);
+  background: var(--secondary-light);
+}
+
+/* Card styles */
+.card {
+  background: white;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* Button enhancements */
+button[type="submit"],
+.btn-primary {
+  border-radius: var(--radius-button);
+  box-shadow: var(--shadow-sm);
+  font-weight: 500;
+}
+
+button[type="submit"]:hover:not(:disabled),
+.btn-primary:hover:not(:disabled) {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+button[type="submit"]:active:not(:disabled),
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Input enhancements */
+input, textarea, select {
+  border-radius: var(--radius-button);
+  border: 1.5px solid var(--border);
+  background: white;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(224, 122, 95, 0.1);
+}
+
+/* Link styles */
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--primary-dark);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+/* Selection */
+::selection {
+  background: var(--primary-light);
+  color: white;
+}
+
+/* Gentle animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* Checkbox styling */
+input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 6px;
+  border: 2px solid var(--border-dark);
+  accent-color: var(--primary);
+}
+
+input[type="checkbox"]:checked {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* Details/summary styling */
+details {
+  border-radius: var(--radius-card);
+}
+
+details summary {
+  cursor: pointer;
+  border-radius: var(--radius-card);
+}
+
+details[open] summary {
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
 }
