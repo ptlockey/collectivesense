@@ -32,9 +32,8 @@ export default function SignupPage() {
       return
     }
 
-    // Redirect to onboarding
-    router.push('/onboard')
-    router.refresh()
+    // Hard redirect to onboarding
+    window.location.href = '/onboard'
   }
 
   return (

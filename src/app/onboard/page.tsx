@@ -36,8 +36,8 @@ export default function OnboardPage() {
       return
     }
 
-    router.push('/')
-    router.refresh()
+    // Hard redirect to ensure page refreshes properly
+    window.location.href = '/'
   }
 
   return (
