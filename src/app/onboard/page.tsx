@@ -7,10 +7,12 @@ import { createClient } from '@/lib/supabase/client'
 export default function OnboardPage() {
   const [confirmed, setConfirmed] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   const handleConfirm = async () => {
     setLoading(true)
+    setError(null)
     const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -20,15 +22,16 @@ export default function OnboardPage() {
     }
 
     // Update or create profile with ethos confirmation
-    const { error } = await supabase
+    const { error: profileError } = await supabase
       .from('profiles')
       .upsert({
         id: user.id,
         ethos_confirmed_at: new Date().toISOString(),
       })
 
-    if (error) {
-      console.error('Error confirming ethos:', error)
+    if (profileError) {
+      console.error('Error confirming ethos:', profileError)
+      setError(`Failed to save: ${profileError.message}`)
       setLoading(false)
       return
     }
@@ -127,6 +130,13 @@ export default function OnboardPage() {
           </label>
         </div>
       </div>
+
+      {/* Error display */}
+      {error && (
+        <div className="mb-4 p-3 bg-error/10 border border-error/20 rounded-lg text-sm text-error">
+          {error}
+        </div>
+      )}
 
       {/* CTA */}
       <button
