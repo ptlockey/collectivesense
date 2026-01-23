@@ -137,9 +137,106 @@ function LandingPage() {
         </div>
       </div>
 
+      {/* Philosophy Section */}
+      <div className="mb-20">
+        <div className="max-w-2xl mx-auto text-center mb-12">
+          <h2 className="text-2xl font-semibold mb-4">The philosophy</h2>
+          <p className="text-secondary leading-relaxed">
+            Why we built something different
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8 mb-12">
+          <div className="bg-white rounded-3xl p-8 border border-border">
+            <h3 className="text-lg font-semibold mb-4 text-primary">The problem with advice online</h3>
+            <p className="text-secondary leading-relaxed mb-4">
+              Most online advice is performance. People write for likes, upvotes, and followers.
+              The loudest voices win, not the wisest. And you&apos;re left sorting through a dozen
+              conflicting opinions, unsure which to trust.
+            </p>
+            <p className="text-secondary leading-relaxed">
+              Even well-meaning advice can feel overwhelming when it comes from individuals
+              competing for your attention.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-3xl p-8 border border-border">
+            <h3 className="text-lg font-semibold mb-4 text-highlight">What if advice had no ego?</h3>
+            <p className="text-secondary leading-relaxed mb-4">
+              We asked: what if contributors couldn&apos;t build a following? What if you couldn&apos;t
+              see who said what? What if the only thing that mattered was whether the
+              collective wisdom actually helped?
+            </p>
+            <p className="text-secondary leading-relaxed">
+              When people contribute anonymously to a synthesis, they write differently.
+              More honestly. More thoughtfully. Less performatively.
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-white to-accent rounded-3xl p-10 border border-border">
+          <h3 className="text-xl font-semibold mb-6 text-center">How synthesis works</h3>
+          <div className="max-w-2xl mx-auto space-y-6 text-secondary leading-relaxed">
+            <p>
+              When you share a problem, it goes to other members of the community. They read your
+              situation and offer their thoughts - what they&apos;d consider, what worked in similar
+              situations, what to watch out for.
+            </p>
+            <p>
+              But here&apos;s the key: <strong className="text-foreground">you never see these individual responses</strong>.
+              Instead, once enough people have contributed, AI synthesises everything into something more useful
+              than any single response could be.
+            </p>
+            <p>
+              The synthesis identifies <strong className="text-foreground">common themes</strong> (what multiple people agreed on),
+              <strong className="text-foreground"> divergent views</strong> (where people disagreed and why both perspectives matter),
+              <strong className="text-foreground"> key considerations</strong> (things you might not have thought about),
+              and <strong className="text-foreground">cautions</strong> (warnings people raised).
+            </p>
+            <p>
+              The result is something that feels less like &quot;advice from strangers&quot; and more like
+              distilled wisdom from people who took time to think about your specific situation.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Community Values */}
+      <div className="mb-20 text-center">
+        <h2 className="text-2xl font-semibold mb-4">Built on trust</h2>
+        <p className="text-secondary mb-10 max-w-lg mx-auto">
+          This only works if people contribute thoughtfully. That&apos;s why everyone who joins
+          commits to these principles:
+        </p>
+        <div className="grid md:grid-cols-3 gap-6 text-left">
+          <div className="bg-accent rounded-2xl p-6">
+            <p className="font-medium mb-2">Contribute kindly</p>
+            <p className="text-secondary text-sm">
+              Real people read your words. Offer what you genuinely believe might help.
+            </p>
+          </div>
+          <div className="bg-accent rounded-2xl p-6">
+            <p className="font-medium mb-2">Let go of ownership</p>
+            <p className="text-secondary text-sm">
+              Your contribution joins others. You won&apos;t be able to point to &quot;your&quot; advice.
+            </p>
+          </div>
+          <div className="bg-accent rounded-2xl p-6">
+            <p className="font-medium mb-2">Help without performing</p>
+            <p className="text-secondary text-sm">
+              No audience to impress. No reputation to build. Just strangers helping strangers.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* CTA */}
-      <div className="text-center py-8">
-        <p className="text-secondary mb-6">Ready to give and receive wisdom?</p>
+      <div className="text-center py-8 mb-8">
+        <p className="text-xl text-foreground mb-3">Ready to give and receive wisdom?</p>
+        <p className="text-secondary mb-8 max-w-md mx-auto">
+          Join a community of people helping each other through life&apos;s challenges,
+          without the noise of social media.
+        </p>
         <Link
           href="/signup"
           className="inline-block px-8 py-4 bg-primary text-white rounded-2xl hover:bg-primary-dark transition-all font-medium text-lg shadow-md hover:shadow-lg hover:-translate-y-0.5"
