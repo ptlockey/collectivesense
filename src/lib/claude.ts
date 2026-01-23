@@ -97,8 +97,8 @@ Respond in JSON format:
 
 export async function checkContentSafety(content: string): Promise<boolean> {
   const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 100,
+    model: 'claude-haiku-4-20250514',
+    max_tokens: 10,
     messages: [
       {
         role: 'user',
