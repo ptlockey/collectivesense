@@ -1,22 +1,28 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { Suspense, useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { DEMO_MODE, demoProblemToContribute } from '@/lib/demo-data'
 import type { ProblemWithCategory } from '@/types'
 
-export default function ContributePage() {
+function ContributeForm() {
+  const searchParams = useSearchParams()
+  const specificProblemId = searchParams.get('problem')
+
   const [problem, setProblem] = useState<ProblemWithCategory | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [contribution, setContribution] = useState('')
   const [noProblems, setNoProblems] = useState(false)
   const [justSubmitted, setJustSubmitted] = useState(false)
+  const [alreadyContributed, setAlreadyContributed] = useState(false)
 
-  const fetchProblem = useCallback(async () => {
+  const fetchProblem = useCallback(async (problemId?: string | null) => {
     setLoading(true)
     setContribution('')
     setJustSubmitted(false)
+    setAlreadyContributed(false)
 
     if (DEMO_MODE) {
       // In demo mode, show the sample problem
@@ -38,6 +44,36 @@ export default function ContributePage() {
 
     const contributedIds = contributions?.map((c) => c.problem_id) || []
 
+    // If a specific problem ID is provided, fetch that one
+    if (problemId) {
+      const { data: specificProblem } = await supabase
+        .from('problems')
+        .select('*, categories(*)')
+        .eq('id', problemId)
+        .eq('status', 'gathering')
+        .single()
+
+      if (specificProblem) {
+        // Check if user already contributed or owns this problem
+        if (contributedIds.includes(problemId)) {
+          setAlreadyContributed(true)
+          setProblem(null)
+        } else if (specificProblem.user_id === user.id) {
+          setNoProblems(true)
+          setProblem(null)
+        } else {
+          setProblem(specificProblem as ProblemWithCategory)
+          setNoProblems(false)
+        }
+      } else {
+        setNoProblems(true)
+        setProblem(null)
+      }
+      setLoading(false)
+      return
+    }
+
+    // Otherwise, fetch a random problem
     let query = supabase
       .from('problems')
       .select('*, categories(*)')
@@ -64,8 +100,8 @@ export default function ContributePage() {
   }, [])
 
   useEffect(() => {
-    fetchProblem()
-  }, [fetchProblem])
+    fetchProblem(specificProblemId)
+  }, [fetchProblem, specificProblemId])
 
   const handleSubmit = async () => {
     if (!problem || !contribution.trim()) return
@@ -111,7 +147,7 @@ export default function ContributePage() {
     setSubmitting(false)
 
     setTimeout(() => {
-      fetchProblem()
+      fetchProblem(null) // Get next random problem
     }, 1500)
   }
 
@@ -120,13 +156,31 @@ export default function ContributePage() {
       setNoProblems(true)
       return
     }
-    fetchProblem()
+    // Clear specific problem and fetch next random one
+    fetchProblem(null)
   }
 
   if (loading) {
     return (
       <div className="py-12 text-center">
         <p className="text-secondary">Finding a problem to help with...</p>
+      </div>
+    )
+  }
+
+  if (alreadyContributed) {
+    return (
+      <div className="max-w-2xl mx-auto py-12 text-center">
+        <h1 className="text-2xl font-semibold mb-4">Already contributed</h1>
+        <p className="text-secondary mb-6">
+          You&apos;ve already shared your thoughts on this one.
+        </p>
+        <button
+          onClick={() => fetchProblem(null)}
+          className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+        >
+          Find another to help with
+        </button>
       </div>
     )
   }
@@ -275,5 +329,13 @@ export default function ContributePage() {
         </>
       )}
     </div>
+  )
+}
+
+export default function ContributePage() {
+  return (
+    <Suspense fallback={<div className="max-w-2xl mx-auto py-12 text-center text-secondary">Loading...</div>}>
+      <ContributeForm />
+    </Suspense>
   )
 }

@@ -258,15 +258,38 @@ function LandingPage() {
   )
 }
 
+interface BrowsableProblem {
+  id: string
+  title: string
+  problem_type: 'advice' | 'opinion'
+  contribution_count: number
+  contribution_threshold: number
+  created_at: string
+  user_id: string
+}
+
 async function Dashboard({ userId, isDemo }: { userId: string; isDemo: boolean }) {
   let profile = null
   let completedProblems: Array<{ id: string; title: string; status: string }> = []
+  let allGatheringProblems: BrowsableProblem[] = []
+  let userContributedIds: string[] = []
 
   if (isDemo) {
     profile = demoProfile
     completedProblems = demoProblems
       .filter(p => p.status === 'complete')
       .map(p => ({ id: p.id, title: p.title, status: p.status }))
+    allGatheringProblems = demoProblems
+      .filter(p => p.status === 'gathering')
+      .map(p => ({
+        id: p.id,
+        title: p.title,
+        problem_type: p.problem_type || 'advice',
+        contribution_count: p.contribution_count,
+        contribution_threshold: p.contribution_threshold,
+        created_at: p.created_at,
+        user_id: p.user_id,
+      }))
   } else {
     const supabase = await createClient()
 
@@ -287,6 +310,23 @@ async function Dashboard({ userId, isDemo }: { userId: string; isDemo: boolean }
       .limit(3)
 
     completedProblems = problemsData || []
+
+    // Fetch all gathering problems for browsing
+    const { data: gatheringData } = await supabase
+      .from('problems')
+      .select('id, title, problem_type, contribution_count, contribution_threshold, created_at, user_id')
+      .eq('status', 'gathering')
+      .order('created_at', { ascending: false })
+
+    allGatheringProblems = (gatheringData || []) as BrowsableProblem[]
+
+    // Get problems user has already contributed to
+    const { data: contributions } = await supabase
+      .from('contributions')
+      .select('problem_id')
+      .eq('user_id', userId)
+
+    userContributedIds = (contributions || []).map(c => c.problem_id)
   }
 
   return (
@@ -358,6 +398,64 @@ async function Dashboard({ userId, isDemo }: { userId: string; isDemo: boolean }
           <div className="px-5 py-3 bg-accent rounded-2xl">
             <p className="text-sm text-secondary">Contributions</p>
             <p className="text-2xl font-semibold text-highlight">{profile.contributions_count}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Browse all submissions */}
+      {allGatheringProblems.length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-xl font-medium mb-4">Browse submissions</h2>
+          <p className="text-sm text-secondary mb-4">
+            Click any to contribute your thoughts
+          </p>
+          <div className="border border-border rounded-2xl bg-white overflow-hidden">
+            <div className="max-h-80 overflow-y-auto divide-y divide-border">
+              {allGatheringProblems.map((problem) => {
+                const isOwn = problem.user_id === userId
+                const hasContributed = userContributedIds.includes(problem.id)
+                const canContribute = !isOwn && !hasContributed
+
+                return (
+                  <Link
+                    key={problem.id}
+                    href={canContribute ? `/contribute?problem=${problem.id}` : '#'}
+                    className={`block p-4 transition-colors ${
+                      canContribute
+                        ? 'hover:bg-accent cursor-pointer'
+                        : 'opacity-60 cursor-default'
+                    }`}
+                    onClick={(e) => !canContribute && e.preventDefault()}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`px-2 py-0.5 text-xs rounded-full flex-shrink-0 ${
+                            problem.problem_type === 'opinion'
+                              ? 'bg-highlight/10 text-highlight'
+                              : 'bg-primary/10 text-primary'
+                          }`}>
+                            {problem.problem_type === 'opinion' ? 'Opinion' : 'Advice'}
+                          </span>
+                          {isOwn && (
+                            <span className="text-xs text-secondary">(yours)</span>
+                          )}
+                          {hasContributed && (
+                            <span className="text-xs text-success">contributed</span>
+                          )}
+                        </div>
+                        <p className="font-medium text-sm truncate">{problem.title}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-xs text-secondary">
+                          {problem.contribution_count}/{problem.contribution_threshold}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
           </div>
         </div>
       )}
