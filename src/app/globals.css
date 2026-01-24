@@ -145,6 +145,11 @@ button[type="submit"],
   font-weight: 500;
 }
 
+/* Ensure white text on primary buttons */
+.bg-primary {
+  color: white;
+}
+
 button[type="submit"]:hover:not(:disabled),
 .btn-primary:hover:not(:disabled) {
   box-shadow: var(--shadow-md);
