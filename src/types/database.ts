@@ -16,6 +16,7 @@ export type Database = {
           ethos_confirmed_at: string | null
           contributions_count: number
           problems_submitted: number
+          is_admin: boolean
           created_at: string
         }
         Insert: {
@@ -24,6 +25,7 @@ export type Database = {
           ethos_confirmed_at?: string | null
           contributions_count?: number
           problems_submitted?: number
+          is_admin?: boolean
           created_at?: string
         }
         Update: {
@@ -32,6 +34,7 @@ export type Database = {
           ethos_confirmed_at?: string | null
           contributions_count?: number
           problems_submitted?: number
+          is_admin?: boolean
           created_at?: string
         }
         Relationships: []
