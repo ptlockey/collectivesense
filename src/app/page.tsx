@@ -26,7 +26,7 @@ function LandingPage() {
         <div className="inline-block mb-6 px-4 py-2 bg-accent rounded-full text-sm text-primary font-medium">
           A different kind of advice
         </div>
-        <h1 className="text-5xl font-semibold text-foreground mb-6 leading-tight">
+        <h1 className="text-5xl font-semibold text-primary mb-6 leading-tight">
           Collective Sense
         </h1>
         <p className="text-lg text-secondary mb-4">

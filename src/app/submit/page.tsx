@@ -54,6 +54,22 @@ function SubmitForm() {
   const [desiredOutcome, setDesiredOutcome] = useState('')
   const [constraints, setConstraints] = useState('')
 
+  // Reset form when navigating to /submit without type param (e.g., clicking "Get Wisdom")
+  useEffect(() => {
+    if (!typeParam) {
+      setStep(0)
+      setProblemType(null)
+      setCategoryId(null)
+      setTitle('')
+      setSituation('')
+      setTriedAlready('')
+      setDesiredOutcome('')
+      setConstraints('')
+      setSubmitted(false)
+      setError(null)
+    }
+  }, [typeParam])
+
   useEffect(() => {
     const fetchCategories = async () => {
       if (DEMO_MODE) {
