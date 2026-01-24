@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
@@ -27,9 +28,16 @@ export function Nav({ user, isAdmin = false }: NavProps) {
           {/* Logo */}
           <Link
             href="/"
-            className="text-lg font-semibold text-primary hover:text-primary-dark"
+            className="flex items-center gap-2 text-lg font-semibold text-primary hover:text-primary-dark"
           >
-            Collective Sense
+            <Image
+              src="/logo.svg"
+              alt="Collective Sense"
+              width={32}
+              height={32}
+              className="w-8 h-8"
+            />
+            <span className="hidden sm:inline">Collective Sense</span>
           </Link>
 
           {/* Navigation Links */}

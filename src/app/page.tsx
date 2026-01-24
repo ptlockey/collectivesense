@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { DEMO_MODE, demoProfile, demoProblems, demoUser } from '@/lib/demo-data'
 
@@ -26,6 +27,13 @@ function LandingPage() {
         <div className="inline-block mb-6 px-4 py-2 bg-accent rounded-full text-sm text-primary font-medium">
           A different kind of advice
         </div>
+        <Image
+          src="/logo.svg"
+          alt="Collective Sense"
+          width={120}
+          height={120}
+          className="mx-auto mb-6"
+        />
         <h1 className="text-5xl font-semibold text-primary mb-6 leading-tight">
           Collective Sense
         </h1>
