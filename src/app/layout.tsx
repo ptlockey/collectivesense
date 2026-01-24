@@ -21,6 +21,7 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   let user = null
+  let isAdmin = false
 
   if (DEMO_MODE) {
     // In demo mode, simulate a logged-in user
@@ -29,6 +30,15 @@ export default async function RootLayout({
     const supabase = await createClient()
     const { data } = await supabase.auth.getUser()
     user = data.user ? { id: data.user.id, email: data.user.email ?? '' } : null
+
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single()
+      isAdmin = profile?.is_admin ?? false
+    }
   }
 
   return (
@@ -39,7 +49,7 @@ export default async function RootLayout({
             Demo Mode - exploring with sample data
           </div>
         )}
-        <Nav user={user} />
+        <Nav user={user} isAdmin={isAdmin} />
         <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
           {children}
         </main>

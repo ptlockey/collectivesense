@@ -11,32 +11,14 @@ export default async function AdminPage() {
   }
 
   // Check if user is admin
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile } = await supabase
     .from('profiles')
     .select('is_admin')
     .eq('id', user.id)
     .single()
 
-  // Debug: show what we got instead of redirecting
-  if (profileError) {
-    return (
-      <div className="py-8">
-        <h1 className="text-2xl font-semibold text-error mb-4">Admin Check Error</h1>
-        <p>Error: {profileError.message}</p>
-        <p>User ID: {user.id}</p>
-      </div>
-    )
-  }
-
   if (!profile?.is_admin) {
-    return (
-      <div className="py-8">
-        <h1 className="text-2xl font-semibold text-error mb-4">Not Admin</h1>
-        <p>User ID: {user.id}</p>
-        <p>Profile: {JSON.stringify(profile)}</p>
-        <p>is_admin value: {String(profile?.is_admin)}</p>
-      </div>
-    )
+    redirect('/')
   }
 
   // Fetch all data for admin

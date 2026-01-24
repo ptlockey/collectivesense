@@ -6,9 +6,10 @@ import { cn } from '@/lib/utils'
 
 interface NavProps {
   user: { id: string; email: string } | null
+  isAdmin?: boolean
 }
 
-export function Nav({ user }: NavProps) {
+export function Nav({ user, isAdmin = false }: NavProps) {
   const pathname = usePathname()
 
   const navLinks = user
@@ -50,14 +51,27 @@ export function Nav({ user }: NavProps) {
 
             {/* Auth buttons */}
             {user ? (
-              <form action="/api/auth/signout" method="POST">
-                <button
-                  type="submit"
-                  className="px-3 py-2 text-sm text-secondary hover:text-foreground rounded-md transition-colors"
-                >
-                  Sign out
-                </button>
-              </form>
+              <div className="flex items-center gap-2">
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    className="px-3 py-2 text-sm bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors font-medium"
+                  >
+                    Admin
+                  </Link>
+                )}
+                <span className="text-xs text-secondary hidden sm:inline px-2">
+                  {user.email}
+                </span>
+                <form action="/api/auth/signout" method="POST">
+                  <button
+                    type="submit"
+                    className="px-3 py-2 text-sm text-secondary hover:text-foreground rounded-md transition-colors"
+                  >
+                    Sign out
+                  </button>
+                </form>
+              </div>
             ) : (
               <div className="flex items-center gap-1">
                 <Link
