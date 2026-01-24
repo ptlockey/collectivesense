@@ -15,6 +15,7 @@ const CATEGORY_ICONS: Record<string, string> = {
   'health': '🏥',
   'practical': '🔧',
   'decisions': '🤔',
+  'other': '💡',
 }
 
 const ADVICE_EXAMPLES = [
@@ -37,7 +38,8 @@ function SubmitForm() {
   const initialType = typeParam === 'advice' || typeParam === 'opinion' ? typeParam : null
 
   const [categories, setCategories] = useState<Category[]>([])
-  const [step, setStep] = useState(initialType ? 1 : 0) // Skip type selection if type is in URL
+  // Skip type selection if type is in URL; opinions skip to step 2 (no category)
+  const [step, setStep] = useState(initialType ? (initialType === 'opinion' ? 2 : 1) : 0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
@@ -109,7 +111,19 @@ function SubmitForm() {
     router.push('/my-problems')
   }
 
-  const totalSteps = problemType === 'opinion' ? 3 : 4
+  // Opinion: step 2 (question) → step 3 (preview) = 2 steps
+  // Advice: step 1 (category) → step 2 (title) → step 3 (context) → step 4 (preview) = 4 steps
+  const totalSteps = problemType === 'opinion' ? 2 : 4
+
+  // Calculate progress step for the indicator
+  const getProgressStep = () => {
+    if (problemType === 'opinion') {
+      // Opinion: step 2 = progress 1, step 3 = progress 2
+      return step - 1
+    }
+    // Advice: step 1-4 maps directly to progress 1-4
+    return step
+  }
 
   if (submitted) {
     return (
@@ -159,7 +173,7 @@ function SubmitForm() {
             <div
               key={s}
               className={`h-1 flex-1 rounded-full ${
-                s <= step ? 'bg-primary' : 'bg-border'
+                s <= getProgressStep() ? 'bg-primary' : 'bg-border'
               }`}
             />
           ))}
@@ -196,7 +210,7 @@ function SubmitForm() {
             <button
               onClick={() => {
                 setProblemType('opinion')
-                setStep(1)
+                setStep(2) // Skip category selection for opinions
               }}
               className="p-6 bg-white border-2 border-border rounded-2xl text-left hover:border-highlight hover:shadow-md transition-all group"
             >
@@ -241,8 +255,8 @@ function SubmitForm() {
         </div>
       )}
 
-      {/* Step 1: Category */}
-      {step === 1 && (
+      {/* Step 1: Category (advice only) */}
+      {step === 1 && problemType === 'advice' && (
         <div>
           <h2 className="text-lg font-medium mb-4">What area is this about?</h2>
           <div className="grid grid-cols-2 gap-3">
@@ -268,6 +282,22 @@ function SubmitForm() {
                 )}
               </button>
             ))}
+            {/* Other option */}
+            <button
+              onClick={() => {
+                setCategoryId(null)
+                setStep(2)
+              }}
+              className={`p-4 border rounded-xl text-left hover:border-primary transition-colors ${
+                categoryId === null ? 'border-primary bg-accent' : 'border-border'
+              }`}
+            >
+              <span className="text-2xl mb-2 block">💡</span>
+              <span className="font-medium">Other</span>
+              <span className="text-sm text-secondary block mt-1">
+                Something else
+              </span>
+            </button>
           </div>
           <button
             onClick={() => setStep(0)}
@@ -326,7 +356,7 @@ function SubmitForm() {
 
           <div className="flex gap-3">
             <button
-              onClick={() => setStep(1)}
+              onClick={() => setStep(problemType === 'opinion' ? 0 : 1)}
               className="px-4 py-2 text-secondary hover:text-foreground"
             >
               Back
@@ -418,9 +448,14 @@ function SubmitForm() {
               }`}>
                 {problemType === 'opinion' ? 'Opinion' : 'Advice'}
               </span>
-              <span className="text-xs text-secondary">
-                {categories.find((c) => c.id === categoryId)?.name}
-              </span>
+              {categoryId && (
+                <span className="text-xs text-secondary">
+                  {categories.find((c) => c.id === categoryId)?.name}
+                </span>
+              )}
+              {!categoryId && problemType === 'advice' && (
+                <span className="text-xs text-secondary">Other</span>
+              )}
             </div>
 
             <h3 className="text-xl font-medium">{title}</h3>
