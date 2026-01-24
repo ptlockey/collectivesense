@@ -19,6 +19,7 @@ export const demoProfile: Profile = {
   ethos_confirmed_at: new Date().toISOString(),
   contributions_count: 12,
   problems_submitted: 3,
+  is_admin: false,
   created_at: new Date().toISOString(),
 }
 
