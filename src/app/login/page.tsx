@@ -45,8 +45,8 @@ function LoginForm() {
 
   return (
     <div className="max-w-md mx-auto py-12">
-      <h1 className="text-2xl font-semibold mb-2">Welcome back</h1>
-      <p className="text-secondary mb-8">Sign in to continue</p>
+      <h1 className="text-2xl font-semibold mb-2 text-foreground">Welcome back</h1>
+      <p className="text-foreground/70 mb-8">Sign in to continue</p>
 
       {DEMO_MODE && (
         <div className="mb-6 p-4 bg-accent border border-border rounded-lg text-sm">
@@ -68,7 +68,7 @@ function LoginForm() {
         )}
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-1">
+          <label htmlFor="email" className="block text-sm font-medium mb-1 text-foreground">
             Email
           </label>
           <input
@@ -83,7 +83,7 @@ function LoginForm() {
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium mb-1">
+          <label htmlFor="password" className="block text-sm font-medium mb-1 text-foreground">
             Password
           </label>
           <input
@@ -106,9 +106,9 @@ function LoginForm() {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-secondary">
+      <p className="mt-6 text-center text-sm text-foreground/70">
         Don&apos;t have an account?{' '}
-        <Link href="/signup" className="text-primary hover:text-primary-dark">
+        <Link href="/signup" className="text-primary font-medium hover:text-primary-dark">
           Join the community
         </Link>
       </p>
