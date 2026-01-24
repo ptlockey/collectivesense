@@ -17,6 +17,7 @@ export function Nav({ user, isAdmin = false }: NavProps) {
     ? [
         { href: '/contribute', label: 'Help Others' },
         { href: '/submit', label: 'Get Wisdom' },
+        { href: '/my-contributions', label: 'My Contributions' },
         { href: '/my-problems', label: 'My Requests' },
       ]
     : []
