@@ -54,10 +54,16 @@ export default async function RootLayout({
           {children}
         </main>
         <footer className="border-t border-border mt-16 py-8 text-center text-sm text-muted-foreground">
-          <p className="mb-2">Collective Sense - wisdom from many, not just one</p>
-          <a href="/support" className="text-primary hover:text-primary-dark">
-            Support this project
-          </a>
+          <p className="mb-3">Collective Sense - wisdom from many, not just one</p>
+          <div className="flex justify-center gap-4">
+            <a href="/faq" className="text-primary hover:text-primary-dark">
+              FAQ
+            </a>
+            <span className="text-border">|</span>
+            <a href="/support" className="text-primary hover:text-primary-dark">
+              Support
+            </a>
+          </div>
         </footer>
       </body>
     </html>
