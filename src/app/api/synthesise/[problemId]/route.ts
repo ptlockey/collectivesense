@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { synthesiseContributions } from '@/lib/claude'
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 import { NextResponse } from 'next/server'
 
 export async function POST(
@@ -8,6 +9,15 @@ export async function POST(
 ) {
   const { problemId } = await params
   const supabase = await createClient()
+
+  // Authentication check
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    )
+  }
 
   // Fetch problem
   const { data: problem, error: problemError } = await supabase
@@ -20,6 +30,28 @@ export async function POST(
     return NextResponse.json(
       { error: 'Problem not found' },
       { status: 404 }
+    )
+  }
+
+  // Authorization check - only problem owner can trigger synthesis
+  if (problem.user_id !== user.id) {
+    return NextResponse.json(
+      { error: 'Forbidden - only the problem owner can trigger synthesis' },
+      { status: 403 }
+    )
+  }
+
+  // Rate limiting
+  const rateLimitResult = checkRateLimit(`synthesise:${user.id}`, RATE_LIMITS.synthesise)
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      { error: 'Too many synthesis requests. Please try again later.' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(Math.ceil(rateLimitResult.resetIn / 1000)),
+        },
+      }
     )
   }
 

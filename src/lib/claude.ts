@@ -138,27 +138,88 @@ Respond in JSON format:
     throw new Error('Could not parse JSON from Claude response')
   }
 
-  return JSON.parse(jsonMatch[0]) as SynthesisResult
+  try {
+    const parsed = JSON.parse(jsonMatch[0])
+
+    // Validate required fields exist
+    if (!parsed.summary || typeof parsed.summary !== 'string') {
+      throw new Error('Invalid synthesis: missing or invalid summary')
+    }
+    if (!Array.isArray(parsed.common_themes)) {
+      parsed.common_themes = []
+    }
+    if (!Array.isArray(parsed.divergent_views)) {
+      parsed.divergent_views = []
+    }
+    if (!Array.isArray(parsed.considerations)) {
+      parsed.considerations = []
+    }
+    if (!Array.isArray(parsed.warnings)) {
+      parsed.warnings = []
+    }
+
+    return parsed as SynthesisResult
+  } catch (parseError) {
+    console.error('Failed to parse Claude JSON response:', textBlock.text)
+    throw new Error(`Failed to parse synthesis JSON: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`)
+  }
 }
 
-export async function checkContentSafety(content: string): Promise<boolean> {
-  const message = await anthropic.messages.create({
-    model: 'claude-haiku-4-20250514',
-    max_tokens: 10,
-    messages: [
-      {
-        role: 'user',
-        content: `Evaluate if this contribution to a problem-solving platform is appropriate. It should be helpful, not harmful, abusive, or spam. Respond with only "SAFE" or "UNSAFE".
+export interface ContentSafetyResult {
+  safe: boolean
+  reason?: string
+}
 
-Content: "${content}"`,
-      },
-    ],
-  })
+export async function checkContentSafety(content: string): Promise<ContentSafetyResult> {
+  try {
+    const message = await anthropic.messages.create({
+      model: 'claude-haiku-4-20250514',
+      max_tokens: 100,
+      messages: [
+        {
+          role: 'user',
+          content: `Evaluate if this contribution to a problem-solving platform is appropriate. It should be helpful, not harmful, abusive, spam, or off-topic.
 
-  const textBlock = message.content.find(block => block.type === 'text')
-  if (!textBlock || textBlock.type !== 'text') {
-    return false
+Content: "${content}"
+
+Respond in this exact JSON format:
+{"safe": true} or {"safe": false, "reason": "brief explanation"}`,
+        },
+      ],
+    })
+
+    const textBlock = message.content.find(block => block.type === 'text')
+    if (!textBlock || textBlock.type !== 'text') {
+      return { safe: false, reason: 'Unable to evaluate content' }
+    }
+
+    const responseText = textBlock.text.trim()
+
+    // Try to parse JSON response
+    try {
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0])
+        return {
+          safe: parsed.safe === true,
+          reason: parsed.reason,
+        }
+      }
+    } catch {
+      // Fall back to simple check
+    }
+
+    // Fallback to simple SAFE/UNSAFE check
+    const isSafe = responseText.toUpperCase().includes('SAFE') &&
+                   !responseText.toUpperCase().includes('UNSAFE')
+
+    return {
+      safe: isSafe,
+      reason: isSafe ? undefined : 'Content may not be appropriate for this platform',
+    }
+  } catch (error) {
+    console.error('Content safety check failed:', error)
+    // Default to safe on error to avoid blocking legitimate content
+    return { safe: true }
   }
-
-  return textBlock.text.trim().toUpperCase() === 'SAFE'
 }

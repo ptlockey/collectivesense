@@ -11,6 +11,7 @@ create table public.profiles (
   ethos_confirmed_at timestamp with time zone,
   contributions_count integer default 0,
   problems_submitted integer default 0,
+  is_admin boolean default false,
   created_at timestamp with time zone default now()
 );
 
@@ -33,6 +34,7 @@ create table public.problems (
   tried_already text,
   desired_outcome text,
   constraints text,
+  problem_type text default 'advice' check (problem_type in ('advice', 'opinion')),
   status text default 'gathering' check (status in ('gathering', 'synthesising', 'complete', 'closed')),
   contribution_threshold integer default 10,
   contribution_count integer default 0,
@@ -184,6 +186,14 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
+-- Database indexes for performance
+create index idx_problems_status on public.problems(status);
+create index idx_problems_user_id on public.problems(user_id);
+create index idx_problems_created_at on public.problems(created_at desc);
+create index idx_contributions_problem_id on public.contributions(problem_id);
+create index idx_contributions_user_id on public.contributions(user_id);
+create index idx_syntheses_problem_id on public.syntheses(problem_id);
+
 -- Seed categories
 insert into public.categories (name, slug, description, icon) values
   ('Life Admin', 'life-admin', 'Bureaucracy, paperwork, organising', '📋'),
@@ -193,4 +203,5 @@ insert into public.categories (name, slug, description, icon) values
   ('Parenting', 'parenting', 'Raising children, family dynamics', '👶'),
   ('Health Decisions', 'health', 'Navigating healthcare, lifestyle choices', '🏥'),
   ('Practical & DIY', 'practical', 'Home, car, technical problems', '🔧'),
-  ('Big Decisions', 'decisions', 'Life crossroads, major choices', '🤔');
+  ('Big Decisions', 'decisions', 'Life crossroads, major choices', '🤔'),
+  ('Other', 'other', 'Anything else', '💭');

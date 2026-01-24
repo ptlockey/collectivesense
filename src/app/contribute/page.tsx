@@ -12,11 +12,15 @@ export default function ContributePage() {
   const [contribution, setContribution] = useState('')
   const [noProblems, setNoProblems] = useState(false)
   const [justSubmitted, setJustSubmitted] = useState(false)
+  const [flagMessage, setFlagMessage] = useState<string | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const fetchProblem = useCallback(async () => {
     setLoading(true)
     setContribution('')
     setJustSubmitted(false)
+    setFlagMessage(null)
+    setSubmitError(null)
 
     if (DEMO_MODE) {
       // In demo mode, show the sample problem
@@ -84,35 +88,42 @@ export default function ContributePage() {
       return
     }
 
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    try {
+      const response = await fetch('/api/contribute', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          problem_id: problem.id,
+          content: contribution,
+        }),
+      })
 
-    if (!user) return
+      const result = await response.json()
 
-    const { error } = await supabase.from('contributions').insert({
-      problem_id: problem.id,
-      user_id: user.id,
-      content: contribution,
-    })
+      if (!response.ok) {
+        setSubmitError(result.error || 'Failed to submit contribution')
+        setSubmitting(false)
+        return
+      }
 
-    if (error) {
+      // Show feedback if content was flagged
+      if (result.flagged) {
+        const reason = result.flagReason || 'Your contribution was flagged for review.'
+        setFlagMessage(`${reason} It will not count toward the synthesis threshold, but has been recorded.`)
+      }
+
+      setJustSubmitted(true)
+      setSubmitting(false)
+
+      setTimeout(() => {
+        fetchProblem()
+      }, result.flagged ? 3000 : 1500) // Give more time to read flag message
+    } catch (error) {
       console.error('Error submitting contribution:', error)
       setSubmitting(false)
-      return
     }
-
-    await supabase.rpc('increment_contribution_count', {
-      problem_id: problem.id,
-    })
-
-    await supabase.rpc('increment_contributions_count', { user_id: user.id })
-
-    setJustSubmitted(true)
-    setSubmitting(false)
-
-    setTimeout(() => {
-      fetchProblem()
-    }, 1500)
   }
 
   const handleSkip = () => {
@@ -148,10 +159,20 @@ export default function ContributePage() {
   if (justSubmitted) {
     return (
       <div className="max-w-2xl mx-auto py-12 text-center">
-        <p className="text-xl text-primary">Thank you</p>
-        <p className="text-secondary mt-2">
-          {DEMO_MODE ? 'Your contribution would join others to form collective wisdom.' : 'Finding the next problem...'}
-        </p>
+        {flagMessage ? (
+          <>
+            <p className="text-xl text-warning">Content Flagged</p>
+            <p className="text-secondary mt-2 max-w-md mx-auto">{flagMessage}</p>
+            <p className="text-secondary mt-4 text-sm">Finding the next problem...</p>
+          </>
+        ) : (
+          <>
+            <p className="text-xl text-primary">Thank you</p>
+            <p className="text-secondary mt-2">
+              {DEMO_MODE ? 'Your contribution would join others to form collective wisdom.' : 'Finding the next problem...'}
+            </p>
+          </>
+        )}
       </div>
     )
   }
@@ -243,6 +264,12 @@ export default function ContributePage() {
                   : 'What thoughts or suggestions do you have?'}
               </p>
             </div>
+
+            {submitError && (
+              <div className="mb-4 p-3 bg-error/10 border border-error/20 rounded-lg text-sm text-error">
+                {submitError}
+              </div>
+            )}
 
             <textarea
               value={contribution}
