@@ -416,43 +416,53 @@ async function Dashboard({ userId, isDemo }: { userId: string; isDemo: boolean }
                 const hasContributed = userContributedIds.includes(problem.id)
                 const canContribute = !isOwn && !hasContributed
 
-                return (
-                  <Link
-                    key={problem.id}
-                    href={canContribute ? `/contribute?problem=${problem.id}` : '#'}
-                    className={`block p-4 transition-colors ${
-                      canContribute
-                        ? 'hover:bg-accent cursor-pointer'
-                        : 'opacity-60 cursor-default'
-                    }`}
-                    onClick={(e) => !canContribute && e.preventDefault()}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`px-2 py-0.5 text-xs rounded-full flex-shrink-0 ${
-                            (problem.problem_type || 'advice') === 'opinion'
-                              ? 'bg-highlight/10 text-highlight'
-                              : 'bg-primary/10 text-primary'
-                          }`}>
-                            {(problem.problem_type || 'advice') === 'opinion' ? 'Opinion' : 'Advice'}
-                          </span>
-                          {isOwn && (
-                            <span className="text-xs text-secondary">(yours)</span>
-                          )}
-                          {hasContributed && (
-                            <span className="text-xs text-success">contributed</span>
-                          )}
-                        </div>
-                        <p className="font-medium text-sm truncate">{problem.title}</p>
+                const content = (
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`px-2 py-0.5 text-xs rounded-full flex-shrink-0 ${
+                          (problem.problem_type || 'advice') === 'opinion'
+                            ? 'bg-highlight/10 text-highlight'
+                            : 'bg-primary/10 text-primary'
+                        }`}>
+                          {(problem.problem_type || 'advice') === 'opinion' ? 'Opinion' : 'Advice'}
+                        </span>
+                        {isOwn && (
+                          <span className="text-xs text-secondary">(yours)</span>
+                        )}
+                        {hasContributed && (
+                          <span className="text-xs text-success">contributed</span>
+                        )}
                       </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-xs text-secondary">
-                          {problem.contribution_count}/{problem.contribution_threshold}
-                        </p>
-                      </div>
+                      <p className="font-medium text-sm truncate">{problem.title}</p>
                     </div>
-                  </Link>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-xs text-secondary">
+                        {problem.contribution_count}/{problem.contribution_threshold}
+                      </p>
+                    </div>
+                  </div>
+                )
+
+                if (canContribute) {
+                  return (
+                    <Link
+                      key={problem.id}
+                      href={`/contribute?problem=${problem.id}`}
+                      className="block p-4 transition-colors hover:bg-accent cursor-pointer"
+                    >
+                      {content}
+                    </Link>
+                  )
+                }
+
+                return (
+                  <div
+                    key={problem.id}
+                    className="block p-4 opacity-60 cursor-default"
+                  >
+                    {content}
+                  </div>
                 )
               })}
             </div>
