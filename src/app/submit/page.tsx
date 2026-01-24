@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { DEMO_MODE, demoCategories } from '@/lib/demo-data'
 import type { Category } from '@/types'
@@ -17,15 +17,34 @@ const CATEGORY_ICONS: Record<string, string> = {
   'decisions': '🤔',
 }
 
-export default function SubmitPage() {
+const ADVICE_EXAMPLES = [
+  "Should I ask for a raise or look for a new job?",
+  "How do I handle a difficult conversation with my teenager?",
+  "I'm struggling with work-life balance - what can I change?",
+  "How should I approach paying off multiple debts?",
+]
+
+const OPINION_EXAMPLES = [
+  "Is Tesco better than Sainsbury's for weekly shopping?",
+  "iPhone or Android - which is better for everyday use?",
+  "Is it worth getting a dashcam?",
+  "Are standing desks actually worth it?",
+]
+
+function SubmitForm() {
+  const searchParams = useSearchParams()
+  const typeParam = searchParams.get('type')
+  const initialType = typeParam === 'advice' || typeParam === 'opinion' ? typeParam : null
+
   const [categories, setCategories] = useState<Category[]>([])
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(initialType ? 1 : 0) // Skip type selection if type is in URL
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
   const router = useRouter()
 
   // Form data
+  const [problemType, setProblemType] = useState<'advice' | 'opinion' | null>(initialType)
   const [categoryId, setCategoryId] = useState<number | null>(null)
   const [title, setTitle] = useState('')
   const [situation, setSituation] = useState('')
@@ -52,7 +71,6 @@ export default function SubmitPage() {
 
   const handleSubmit = async () => {
     if (DEMO_MODE) {
-      // In demo mode, just show success
       setSubmitted(true)
       return
     }
@@ -76,6 +94,7 @@ export default function SubmitPage() {
       tried_already: triedAlready || null,
       desired_outcome: desiredOutcome || null,
       constraints: constraints || null,
+      problem_type: problemType ?? undefined,
       contribution_threshold: 5,
     })
 
@@ -90,25 +109,31 @@ export default function SubmitPage() {
     router.push('/my-problems')
   }
 
+  const totalSteps = problemType === 'opinion' ? 3 : 4
+
   if (submitted) {
     return (
       <div className="max-w-2xl mx-auto py-12 text-center">
         <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-6">
           <span className="text-2xl">✓</span>
         </div>
-        <h1 className="text-2xl font-semibold mb-4">Problem submitted</h1>
+        <h1 className="text-2xl font-semibold mb-4">
+          {problemType === 'opinion' ? 'Opinion request submitted' : 'Advice request submitted'}
+        </h1>
         <p className="text-secondary mb-6">
-          In a real scenario, your problem would now be visible to other members who can contribute their thoughts.
-          You&apos;d receive a synthesis once enough people have contributed.
+          Your {problemType === 'opinion' ? 'question' : 'situation'} is now visible to other members who can contribute their thoughts.
+          You&apos;ll receive a synthesis once enough people have contributed.
         </p>
-        <p className="text-sm text-muted-foreground mb-8">
-          (This is demo mode - no data was actually saved)
-        </p>
+        {DEMO_MODE && (
+          <p className="text-sm text-muted-foreground mb-8">
+            (This is demo mode - no data was actually saved)
+          </p>
+        )}
         <button
           onClick={() => router.push('/my-problems')}
           className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
         >
-          View my problems
+          View my requests
         </button>
       </div>
     )
@@ -116,9 +141,9 @@ export default function SubmitPage() {
 
   return (
     <div className="max-w-2xl mx-auto py-8">
-      <h1 className="text-2xl font-semibold mb-2">Share a problem</h1>
+      <h1 className="text-2xl font-semibold mb-2">Get Collective Wisdom</h1>
       <p className="text-secondary mb-8">
-        Describe your situation and receive synthesised collective wisdom
+        Ask for advice on a situation or get opinions on a decision
       </p>
 
       {error && (
@@ -127,17 +152,94 @@ export default function SubmitPage() {
         </div>
       )}
 
-      {/* Progress indicator */}
-      <div className="flex gap-2 mb-8">
-        {[1, 2, 3, 4].map((s) => (
-          <div
-            key={s}
-            className={`h-1 flex-1 rounded-full ${
-              s <= step ? 'bg-primary' : 'bg-border'
-            }`}
-          />
-        ))}
-      </div>
+      {/* Progress indicator - only show after type selection */}
+      {step > 0 && (
+        <div className="flex gap-2 mb-8">
+          {Array.from({ length: totalSteps }, (_, i) => i + 1).map((s) => (
+            <div
+              key={s}
+              className={`h-1 flex-1 rounded-full ${
+                s <= step ? 'bg-primary' : 'bg-border'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Step 0: Choose type */}
+      {step === 0 && (
+        <div>
+          <h2 className="text-lg font-medium mb-6">What would you like?</h2>
+
+          <div className="grid md:grid-cols-2 gap-4 mb-8">
+            {/* Advice option */}
+            <button
+              onClick={() => {
+                setProblemType('advice')
+                setStep(1)
+              }}
+              className="p-6 bg-white border-2 border-border rounded-2xl text-left hover:border-primary hover:shadow-md transition-all group"
+            >
+              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary/20">
+                <span className="text-2xl">💭</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Collective Advice</h3>
+              <p className="text-secondary text-sm mb-4">
+                Get synthesised wisdom from multiple people on a situation you&apos;re facing
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Best for: personal dilemmas, decisions, challenges
+              </p>
+            </button>
+
+            {/* Opinion option */}
+            <button
+              onClick={() => {
+                setProblemType('opinion')
+                setStep(1)
+              }}
+              className="p-6 bg-white border-2 border-border rounded-2xl text-left hover:border-highlight hover:shadow-md transition-all group"
+            >
+              <div className="w-12 h-12 bg-highlight/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-highlight/20">
+                <span className="text-2xl">⚖️</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Collective Opinion</h3>
+              <p className="text-secondary text-sm mb-4">
+                Find out what people think about a choice, product, or comparison
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Best for: comparisons, recommendations, preferences
+              </p>
+            </button>
+          </div>
+
+          {/* Examples */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-accent rounded-2xl p-5">
+              <p className="text-sm font-medium mb-3 text-primary">Advice examples:</p>
+              <ul className="space-y-2">
+                {ADVICE_EXAMPLES.map((ex, i) => (
+                  <li key={i} className="text-sm text-secondary flex gap-2">
+                    <span className="text-primary">•</span>
+                    {ex}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="bg-accent rounded-2xl p-5">
+              <p className="text-sm font-medium mb-3 text-highlight">Opinion examples:</p>
+              <ul className="space-y-2">
+                {OPINION_EXAMPLES.map((ex, i) => (
+                  <li key={i} className="text-sm text-secondary flex gap-2">
+                    <span className="text-highlight">•</span>
+                    {ex}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Step 1: Category */}
       {step === 1 && (
@@ -151,7 +253,7 @@ export default function SubmitPage() {
                   setCategoryId(cat.id)
                   setStep(2)
                 }}
-                className={`p-4 border rounded-lg text-left hover:border-primary transition-colors ${
+                className={`p-4 border rounded-xl text-left hover:border-primary transition-colors ${
                   categoryId === cat.id ? 'border-primary bg-accent' : 'border-border'
                 }`}
               >
@@ -167,15 +269,21 @@ export default function SubmitPage() {
               </button>
             ))}
           </div>
+          <button
+            onClick={() => setStep(0)}
+            className="mt-4 px-4 py-2 text-secondary hover:text-foreground"
+          >
+            ← Back
+          </button>
         </div>
       )}
 
-      {/* Step 2: Title and Situation */}
+      {/* Step 2: Title and Details */}
       {step === 2 && (
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Give it a brief title
+            <label className="block text-sm font-medium mb-2 text-foreground">
+              {problemType === 'opinion' ? 'Your question' : 'Give it a brief title'}
             </label>
             <input
               type="text"
@@ -183,7 +291,11 @@ export default function SubmitPage() {
               onChange={(e) => setTitle(e.target.value)}
               maxLength={100}
               className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              placeholder="e.g., Struggling with work-life balance"
+              placeholder={
+                problemType === 'opinion'
+                  ? 'e.g., Is it worth switching to an electric car?'
+                  : 'e.g., Struggling with work-life balance'
+              }
             />
             <p className="text-xs text-secondary mt-1">
               {title.length}/100 characters
@@ -191,19 +303,25 @@ export default function SubmitPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
-              What&apos;s the situation?
+            <label className="block text-sm font-medium mb-2 text-foreground">
+              {problemType === 'opinion' ? 'Add any context (optional)' : "What's the situation?"}
             </label>
             <textarea
               value={situation}
               onChange={(e) => setSituation(e.target.value)}
-              rows={6}
+              rows={problemType === 'opinion' ? 4 : 6}
               className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              placeholder="Describe what you're facing. The more context you provide, the more helpful the collective wisdom will be."
+              placeholder={
+                problemType === 'opinion'
+                  ? 'Any specific things you want people to consider? (e.g., budget, use case, priorities)'
+                  : 'Describe what you\'re facing. The more context you provide, the more helpful the collective wisdom will be.'
+              }
             />
-            <p className="text-xs text-secondary mt-1">
-              Be specific - include relevant details about your situation
-            </p>
+            {problemType !== 'opinion' && (
+              <p className="text-xs text-secondary mt-1">
+                Be specific - include relevant details about your situation
+              </p>
+            )}
           </div>
 
           <div className="flex gap-3">
@@ -215,20 +333,20 @@ export default function SubmitPage() {
             </button>
             <button
               onClick={() => setStep(3)}
-              disabled={!title.trim() || !situation.trim()}
+              disabled={!title.trim() || (problemType === 'advice' && !situation.trim())}
               className="flex-1 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
             >
-              Continue
+              {problemType === 'opinion' ? 'Preview' : 'Continue'}
             </button>
           </div>
         </div>
       )}
 
-      {/* Step 3: Additional context */}
-      {step === 3 && (
+      {/* Step 3: Additional context (advice only) */}
+      {step === 3 && problemType === 'advice' && (
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-foreground">
               What have you already tried?{' '}
               <span className="text-secondary font-normal">(optional)</span>
             </label>
@@ -242,7 +360,7 @@ export default function SubmitPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-foreground">
               What would a good outcome look like?{' '}
               <span className="text-secondary font-normal">(optional)</span>
             </label>
@@ -256,7 +374,7 @@ export default function SubmitPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-foreground">
               Any constraints or limitations?{' '}
               <span className="text-secondary font-normal">(optional)</span>
             </label>
@@ -286,25 +404,35 @@ export default function SubmitPage() {
         </div>
       )}
 
-      {/* Step 4: Preview */}
-      {step === 4 && (
+      {/* Preview step */}
+      {((step === 3 && problemType === 'opinion') || (step === 4 && problemType === 'advice')) && (
         <div>
-          <h2 className="text-lg font-medium mb-4">Preview your problem</h2>
+          <h2 className="text-lg font-medium mb-4">Preview your request</h2>
 
           <div className="border border-border rounded-xl p-6 space-y-4">
-            <div>
-              <span className="text-xs text-secondary uppercase tracking-wide">
+            <div className="flex items-center gap-2 mb-2">
+              <span className={`px-2 py-1 text-xs rounded-full ${
+                problemType === 'opinion'
+                  ? 'bg-highlight/10 text-highlight'
+                  : 'bg-primary/10 text-primary'
+              }`}>
+                {problemType === 'opinion' ? 'Opinion' : 'Advice'}
+              </span>
+              <span className="text-xs text-secondary">
                 {categories.find((c) => c.id === categoryId)?.name}
               </span>
-              <h3 className="text-xl font-medium mt-1">{title}</h3>
             </div>
 
-            <div>
-              <h4 className="text-sm font-medium text-secondary mb-1">
-                Situation
-              </h4>
-              <p className="whitespace-pre-wrap">{situation}</p>
-            </div>
+            <h3 className="text-xl font-medium">{title}</h3>
+
+            {situation && (
+              <div>
+                <h4 className="text-sm font-medium text-secondary mb-1">
+                  {problemType === 'opinion' ? 'Context' : 'Situation'}
+                </h4>
+                <p className="whitespace-pre-wrap">{situation}</p>
+              </div>
+            )}
 
             {triedAlready && (
               <div>
@@ -335,14 +463,14 @@ export default function SubmitPage() {
           </div>
 
           <p className="text-sm text-secondary mt-4">
-            Once submitted, your problem will be shown to other members who can
+            Once submitted, your {problemType === 'opinion' ? 'question' : 'situation'} will be shown to other members who can
             contribute their thoughts. You&apos;ll receive a synthesis once
             enough people have contributed.
           </p>
 
           <div className="flex gap-3 mt-6">
             <button
-              onClick={() => setStep(3)}
+              onClick={() => setStep(problemType === 'opinion' ? 2 : 3)}
               className="px-4 py-2 text-secondary hover:text-foreground"
             >
               Back
@@ -352,11 +480,19 @@ export default function SubmitPage() {
               disabled={loading}
               className="flex-1 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
             >
-              {loading ? 'Submitting...' : 'Submit problem'}
+              {loading ? 'Submitting...' : `Submit ${problemType === 'opinion' ? 'question' : 'request'}`}
             </button>
           </div>
         </div>
       )}
     </div>
+  )
+}
+
+export default function SubmitPage() {
+  return (
+    <Suspense fallback={<div className="max-w-2xl mx-auto py-12 text-center text-secondary">Loading...</div>}>
+      <SubmitForm />
+    </Suspense>
   )
 }

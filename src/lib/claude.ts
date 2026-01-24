@@ -19,13 +19,16 @@ export interface ProblemContext {
   tried_already?: string | null
   desired_outcome?: string | null
   constraints?: string | null
+  problem_type?: 'advice' | 'opinion'
 }
 
 export async function synthesiseContributions(
   problem: ProblemContext,
   contributions: string[]
 ): Promise<SynthesisResult> {
-  const prompt = `You are synthesising multiple anonymous contributions to help someone with a problem. Your role is to distill collective wisdom, not summarise individual posts.
+  const isOpinion = problem.problem_type === 'opinion'
+
+  const advicePrompt = `You are synthesising multiple anonymous contributions to help someone with a problem. Your role is to distill collective wisdom, not summarise individual posts.
 
 THE PROBLEM:
 Title: ${problem.title}
@@ -36,7 +39,7 @@ Desired outcome: ${problem.desired_outcome || 'Not specified'}
 Constraints: ${problem.constraints || 'None specified'}
 
 CONTRIBUTIONS FROM ${contributions.length} PEOPLE:
-${contributions.map((c, i) => `---\n${c}\n---`).join('\n')}
+${contributions.map((c) => `---\n${c}\n---`).join('\n')}
 
 ---
 
@@ -68,6 +71,49 @@ Respond in JSON format:
   "considerations": ["string"],
   "warnings": ["string"]
 }`
+
+  const opinionPrompt = `You are synthesising multiple anonymous opinions on a question. Your role is to distill the collective view, not summarise individual responses.
+
+THE QUESTION:
+${problem.title}
+Category: ${problem.category}
+Context: ${problem.situation || 'No additional context provided'}
+
+OPINIONS FROM ${contributions.length} PEOPLE:
+${contributions.map((c) => `---\n${c}\n---`).join('\n')}
+
+---
+
+Create a synthesis with these sections:
+
+1. SUMMARY: A clear paragraph summarising the collective opinion. If there's a clear majority view, state it (e.g., "Most people think X"). If it's split, say so. Write as "The collective opinion is..." or "People generally think..." - never attribute to individuals.
+
+2. COMMON THEMES: What reasons or points appeared multiple times? List 3-5 themes, each with a brief explanation of why people mentioned this.
+
+3. DIVERGENT VIEWS: Where did opinions differ? Present both sides fairly - different perspectives help the person make their own decision.
+
+4. CONSIDERATIONS: "It depends" factors - things people said would change their answer depending on circumstances.
+
+5. CAUTIONS: Any "watch out for" points or things to be aware of. Only include if genuinely present in contributions.
+
+Tone: Balanced, practical, conversational. This is collective opinion from people who took time to share their view.
+
+Do not:
+- Attribute anything to specific contributors
+- Make up opinions not present in contributions
+- Be preachy or lecture
+- Try to tell the person what they "should" do - just share what people think
+
+Respond in JSON format:
+{
+  "summary": "string",
+  "common_themes": [{"theme": "string", "explanation": "string"}],
+  "divergent_views": [{"view": "string", "alternative": "string"}],
+  "considerations": ["string"],
+  "warnings": ["string"]
+}`
+
+  const prompt = isOpinion ? opinionPrompt : advicePrompt
 
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',

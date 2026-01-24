@@ -15,8 +15,8 @@ export function Nav({ user, isAdmin = false }: NavProps) {
   const navLinks = user
     ? [
         { href: '/contribute', label: 'Help Others' },
-        { href: '/submit', label: 'Share a Problem' },
-        { href: '/my-problems', label: 'My Problems' },
+        { href: '/submit', label: 'Get Wisdom' },
+        { href: '/my-problems', label: 'My Requests' },
       ]
     : []
 

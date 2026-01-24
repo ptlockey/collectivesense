@@ -33,7 +33,7 @@ function LandingPage() {
           Wisdom from many, not just one
         </p>
         <p className="text-xl text-secondary max-w-xl mx-auto mb-10 leading-relaxed">
-          Share what you&apos;re facing. Receive synthesised insights from people who&apos;ve been there.
+          Get advice on life&apos;s complex decisions, or opinions on everyday choices.
           No individual responses. No ego. Just collective wisdom.
         </p>
         <div className="flex gap-4 justify-center flex-wrap">
@@ -65,9 +65,9 @@ function LandingPage() {
             <div className="w-14 h-14 bg-gradient-to-br from-primary to-primary-light rounded-2xl flex items-center justify-center mb-6 text-white font-bold text-xl">
               1
             </div>
-            <h3 className="font-semibold text-lg mb-3">Share a problem</h3>
+            <h3 className="font-semibold text-lg mb-3">Ask for advice or opinions</h3>
             <p className="text-secondary leading-relaxed">
-              Describe what you&apos;re facing honestly. The more context you give, the better the wisdom you&apos;ll receive.
+              Share a complex situation for thoughtful advice, or ask a simple comparison question for collective opinions.
             </p>
           </div>
           <div className="bg-white rounded-3xl p-8 shadow-sm border border-border hover:shadow-md transition-all">
@@ -287,7 +287,7 @@ async function Dashboard({ userId, isDemo }: { userId: string; isDemo: boolean }
       <p className="text-secondary mb-10">What would you like to do today?</p>
 
       {/* Quick Actions */}
-      <div className="grid md:grid-cols-2 gap-6 mb-12">
+      <div className="grid md:grid-cols-3 gap-6 mb-12">
         <Link
           href="/contribute"
           className="block p-8 bg-white border border-border rounded-3xl hover:border-highlight hover:shadow-md transition-all group"
@@ -299,22 +299,43 @@ async function Dashboard({ userId, isDemo }: { userId: string; isDemo: boolean }
             Help others
           </h2>
           <p className="text-secondary">
-            Share your thoughts on problems others are facing
+            Share your thoughts on questions others have asked
           </p>
         </Link>
 
         <Link
-          href="/submit"
+          href="/submit?type=advice"
           className="block p-8 bg-white border border-border rounded-3xl hover:border-primary hover:shadow-md transition-all group"
         >
           <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-            <span className="text-2xl">✨</span>
+            <span className="text-2xl">🧭</span>
           </div>
           <h2 className="text-xl font-medium mb-2 group-hover:text-primary">
-            Share a problem
+            Get Advice
           </h2>
-          <p className="text-secondary">
-            Get collective wisdom on something you&apos;re facing
+          <p className="text-secondary text-sm">
+            For complex situations needing thoughtful guidance
+          </p>
+          <p className="text-xs text-secondary/70 mt-2 italic">
+            e.g. &quot;Should I ask for a raise or look for a new job?&quot;
+          </p>
+        </Link>
+
+        <Link
+          href="/submit?type=opinion"
+          className="block p-8 bg-white border border-border rounded-3xl hover:border-warning hover:shadow-md transition-all group"
+        >
+          <div className="w-12 h-12 bg-warning/10 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-warning/20 transition-colors">
+            <span className="text-2xl">⚖️</span>
+          </div>
+          <h2 className="text-xl font-medium mb-2 group-hover:text-warning">
+            Get Opinions
+          </h2>
+          <p className="text-secondary text-sm">
+            For quick comparisons and everyday choices
+          </p>
+          <p className="text-xs text-secondary/70 mt-2 italic">
+            e.g. &quot;Is Tesco better than Sainsbury&apos;s?&quot;
           </p>
         </Link>
       </div>
@@ -323,7 +344,7 @@ async function Dashboard({ userId, isDemo }: { userId: string; isDemo: boolean }
       {profile && (
         <div className="flex gap-6 mb-12">
           <div className="px-5 py-3 bg-accent rounded-2xl">
-            <p className="text-sm text-secondary">Problems shared</p>
+            <p className="text-sm text-secondary">Requests made</p>
             <p className="text-2xl font-semibold text-primary">{profile.problems_submitted}</p>
           </div>
           <div className="px-5 py-3 bg-accent rounded-2xl">
@@ -356,7 +377,7 @@ async function Dashboard({ userId, isDemo }: { userId: string; isDemo: boolean }
             href="/my-problems"
             className="inline-block mt-6 text-primary hover:text-primary-dark font-medium"
           >
-            View all your problems →
+            View all your requests →
           </Link>
         </div>
       )}

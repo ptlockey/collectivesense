@@ -66,6 +66,7 @@ export async function POST(
         tried_already: problem.tried_already,
         desired_outcome: problem.desired_outcome,
         constraints: problem.constraints,
+        problem_type: problem.problem_type as 'advice' | 'opinion' | undefined,
       },
       contributions.map((c) => c.content)
     )

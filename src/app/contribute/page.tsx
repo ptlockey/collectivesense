@@ -173,17 +173,30 @@ export default function ContributePage() {
           {/* Problem display */}
           <div className="border border-border rounded-xl p-6 mb-6">
             <div className="mb-4">
-              <span className="text-xs text-secondary uppercase tracking-wide">
-                {problem.categories?.name}
-              </span>
+              <div className="flex items-center gap-2 mb-1">
+                <span className={`px-2 py-0.5 text-xs rounded-full ${
+                  problem.problem_type === 'opinion'
+                    ? 'bg-highlight/10 text-highlight'
+                    : 'bg-primary/10 text-primary'
+                }`}>
+                  {problem.problem_type === 'opinion' ? 'Opinion' : 'Advice'}
+                </span>
+                <span className="text-xs text-secondary">
+                  {problem.categories?.name}
+                </span>
+              </div>
               <h2 className="text-xl font-medium mt-1">{problem.title}</h2>
             </div>
 
             <div className="space-y-4 text-sm">
+              {problem.situation && (
               <div>
-                <h3 className="font-medium text-secondary mb-1">Situation</h3>
+                <h3 className="font-medium text-secondary mb-1">
+                  {problem.problem_type === 'opinion' ? 'Context' : 'Situation'}
+                </h3>
                 <p className="whitespace-pre-wrap">{problem.situation}</p>
               </div>
+              )}
 
               {problem.tried_already && (
                 <div>
@@ -225,7 +238,9 @@ export default function ContributePage() {
           <div>
             <div className="mb-3">
               <p className="text-sm text-secondary">
-                What thoughts or suggestions do you have?
+                {problem.problem_type === 'opinion'
+                  ? 'What\'s your take on this?'
+                  : 'What thoughts or suggestions do you have?'}
               </p>
             </div>
 
@@ -234,7 +249,11 @@ export default function ContributePage() {
               onChange={(e) => setContribution(e.target.value)}
               rows={5}
               className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary mb-4"
-              placeholder="Share what you'd suggest, what's worked in similar situations, or what they should consider..."
+              placeholder={
+                problem.problem_type === 'opinion'
+                  ? "Share your opinion and reasoning - what do you think and why?"
+                  : "Share what you'd suggest, what's worked in similar situations, or what they should consider..."
+              }
             />
 
             <div className="flex gap-3">

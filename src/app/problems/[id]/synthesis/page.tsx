@@ -92,21 +92,34 @@ export default async function SynthesisPage({ params }: SynthesisPageProps) {
       {/* Original problem - collapsed */}
       <details className="mb-8 border border-border rounded-xl">
         <summary className="px-5 py-4 cursor-pointer text-sm font-medium text-secondary hover:text-foreground">
-          Your original problem
+          {problem.problem_type === 'opinion' ? 'Your original question' : 'Your original request'}
         </summary>
         <div className="px-5 pb-5 pt-2 border-t border-border">
-          <span className="text-xs text-secondary">
-            {problem.categories?.name}
-          </span>
+          <div className="flex items-center gap-2 mb-1">
+            <span className={`px-2 py-0.5 text-xs rounded-full ${
+              problem.problem_type === 'opinion'
+                ? 'bg-highlight/10 text-highlight'
+                : 'bg-primary/10 text-primary'
+            }`}>
+              {problem.problem_type === 'opinion' ? 'Opinion' : 'Advice'}
+            </span>
+            <span className="text-xs text-secondary">
+              {problem.categories?.name}
+            </span>
+          </div>
           <h2 className="font-medium mt-1 mb-3">{problem.title}</h2>
-          <p className="text-sm whitespace-pre-wrap">{problem.situation}</p>
+          {problem.situation && (
+            <p className="text-sm whitespace-pre-wrap">{problem.situation}</p>
+          )}
         </div>
       </details>
 
       {/* Synthesis */}
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-semibold mb-2">Collective Wisdom</h1>
+          <h1 className="text-2xl font-semibold mb-2">
+            {problem.problem_type === 'opinion' ? 'Collective Opinion' : 'Collective Wisdom'}
+          </h1>
           <p className="text-sm text-secondary">
             Synthesised from {parsedSynthesis.contribution_count} contributions
           </p>

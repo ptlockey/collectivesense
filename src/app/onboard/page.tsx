@@ -69,9 +69,9 @@ export default function OnboardPage() {
             <li className="flex gap-3">
               <span className="text-primary font-medium">3.</span>
               <p>
-                When you share a problem, you receive a{' '}
+                When you ask for advice or opinions, you receive a{' '}
                 <strong className="text-foreground">synthesis</strong> of what
-                multiple people suggested - themes, common advice, and divergent
+                multiple people suggested - themes, common insights, and divergent
                 views.
               </p>
             </li>

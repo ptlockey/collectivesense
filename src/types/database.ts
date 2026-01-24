@@ -74,6 +74,7 @@ export type Database = {
           desired_outcome: string | null
           constraints: string | null
           status: string
+          problem_type: 'advice' | 'opinion'
           contribution_threshold: number
           contribution_count: number
           created_at: string
@@ -89,6 +90,7 @@ export type Database = {
           desired_outcome?: string | null
           constraints?: string | null
           status?: string
+          problem_type?: 'advice' | 'opinion'
           contribution_threshold?: number
           contribution_count?: number
           created_at?: string
@@ -104,6 +106,7 @@ export type Database = {
           desired_outcome?: string | null
           constraints?: string | null
           status?: string
+          problem_type?: 'advice' | 'opinion'
           contribution_threshold?: number
           contribution_count?: number
           created_at?: string
