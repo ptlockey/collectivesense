@@ -261,7 +261,7 @@ function LandingPage() {
 interface BrowsableProblem {
   id: string
   title: string
-  problem_type: 'advice' | 'opinion'
+  problem_type: 'advice' | 'opinion' | null
   contribution_count: number
   contribution_threshold: number
   created_at: string
@@ -431,11 +431,11 @@ async function Dashboard({ userId, isDemo }: { userId: string; isDemo: boolean }
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className={`px-2 py-0.5 text-xs rounded-full flex-shrink-0 ${
-                            problem.problem_type === 'opinion'
+                            (problem.problem_type || 'advice') === 'opinion'
                               ? 'bg-highlight/10 text-highlight'
                               : 'bg-primary/10 text-primary'
                           }`}>
-                            {problem.problem_type === 'opinion' ? 'Opinion' : 'Advice'}
+                            {(problem.problem_type || 'advice') === 'opinion' ? 'Opinion' : 'Advice'}
                           </span>
                           {isOwn && (
                             <span className="text-xs text-secondary">(yours)</span>
