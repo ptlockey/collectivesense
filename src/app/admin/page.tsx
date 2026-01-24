@@ -17,11 +17,26 @@ export default async function AdminPage() {
     .eq('id', user.id)
     .single()
 
-  console.log('Admin check:', { userId: user.id, profile, profileError })
+  // Debug: show what we got instead of redirecting
+  if (profileError) {
+    return (
+      <div className="py-8">
+        <h1 className="text-2xl font-semibold text-error mb-4">Admin Check Error</h1>
+        <p>Error: {profileError.message}</p>
+        <p>User ID: {user.id}</p>
+      </div>
+    )
+  }
 
   if (!profile?.is_admin) {
-    console.log('Not admin, redirecting. Profile:', profile)
-    redirect('/')
+    return (
+      <div className="py-8">
+        <h1 className="text-2xl font-semibold text-error mb-4">Not Admin</h1>
+        <p>User ID: {user.id}</p>
+        <p>Profile: {JSON.stringify(profile)}</p>
+        <p>is_admin value: {String(profile?.is_admin)}</p>
+      </div>
+    )
   }
 
   // Fetch all data for admin
