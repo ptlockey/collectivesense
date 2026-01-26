@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { checkContentSafety } from '@/lib/claude'
+import { checkRateLimit, getClientIdentifier, rateLimits } from '@/lib/rate-limit'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
@@ -13,12 +14,62 @@ export async function POST(request: Request) {
     )
   }
 
+  // Rate limiting - use user ID for authenticated requests
+  const rateLimitResult = checkRateLimit(`contribute:${user.id}`, rateLimits.contribute)
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': rateLimitResult.resetIn.toString(),
+        },
+      }
+    )
+  }
+
   const { problem_id, content } = await request.json()
 
   if (!problem_id || !content) {
     return NextResponse.json(
       { error: 'Missing required fields' },
       { status: 400 }
+    )
+  }
+
+  // Validate content length (prevent abuse)
+  if (typeof content !== 'string' || content.length > 10000) {
+    return NextResponse.json(
+      { error: 'Content must be under 10,000 characters' },
+      { status: 400 }
+    )
+  }
+
+  // Validate problem exists, is in gathering status, and user doesn't own it
+  const { data: problem, error: problemError } = await supabase
+    .from('problems')
+    .select('id, user_id, status')
+    .eq('id', problem_id)
+    .single()
+
+  if (problemError || !problem) {
+    return NextResponse.json(
+      { error: 'Problem not found' },
+      { status: 404 }
+    )
+  }
+
+  if (problem.status !== 'gathering') {
+    return NextResponse.json(
+      { error: 'Problem is not accepting contributions' },
+      { status: 400 }
+    )
+  }
+
+  if (problem.user_id === user.id) {
+    return NextResponse.json(
+      { error: 'Cannot contribute to your own problem' },
+      { status: 403 }
     )
   }
 
@@ -62,9 +113,12 @@ export async function POST(request: Request) {
       problem &&
       problem.contribution_count >= problem.contribution_threshold
     ) {
-      // Trigger synthesis (fire and forget)
+      // Trigger synthesis (fire and forget) with internal secret
       fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/synthesise/${problem_id}`, {
         method: 'POST',
+        headers: {
+          'x-internal-secret': process.env.INTERNAL_API_SECRET || '',
+        },
       }).catch(console.error)
     }
   }

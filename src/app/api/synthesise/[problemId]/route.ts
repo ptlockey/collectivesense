@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { synthesiseContributions } from '@/lib/claude'
+import { checkRateLimit, getClientIdentifier, rateLimits } from '@/lib/rate-limit'
 import { NextResponse } from 'next/server'
 
 export async function POST(
@@ -8,6 +9,37 @@ export async function POST(
 ) {
   const { problemId } = await params
   const supabase = await createClient()
+
+  // Verify the request is authenticated (either from internal trigger or admin)
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Allow internal calls (from contribute API) via a secret header
+  const internalSecret = request.headers.get('x-internal-secret')
+  const isInternalCall = internalSecret === process.env.INTERNAL_API_SECRET
+
+  if (!user && !isInternalCall) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    )
+  }
+
+  // Rate limiting (skip for internal calls)
+  if (!isInternalCall) {
+    const identifier = user ? `synthesise:${user.id}` : `synthesise:${getClientIdentifier(request)}`
+    const rateLimitResult = checkRateLimit(identifier, rateLimits.synthesise)
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': rateLimitResult.resetIn.toString(),
+          },
+        }
+      )
+    }
+  }
 
   // Fetch problem
   const { data: problem, error: problemError } = await supabase

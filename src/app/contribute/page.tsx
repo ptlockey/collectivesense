@@ -120,28 +120,25 @@ function ContributeForm() {
       return
     }
 
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) return
-
-    const { error } = await supabase.from('contributions').insert({
-      problem_id: problem.id,
-      user_id: user.id,
-      content: contribution,
+    // Use the API route for proper validation and synthesis triggering
+    const response = await fetch('/api/contribute', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        problem_id: problem.id,
+        content: contribution,
+      }),
     })
 
-    if (error) {
-      console.error('Error submitting contribution:', error)
+    const result = await response.json()
+
+    if (!response.ok) {
+      console.error('Error submitting contribution:', result.error)
       setSubmitting(false)
       return
     }
-
-    await supabase.rpc('increment_contribution_count', {
-      problem_id: problem.id,
-    })
-
-    await supabase.rpc('increment_contributions_count', { user_id: user.id })
 
     setJustSubmitted(true)
     setSubmitting(false)

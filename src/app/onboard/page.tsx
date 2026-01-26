@@ -21,11 +21,12 @@ export default function OnboardPage() {
       return
     }
 
-    // Update or create profile with ethos confirmation
+    // Update or create profile with ethos confirmation and email
     const { error: profileError } = await supabase
       .from('profiles')
       .upsert({
         id: user.id,
+        email: user.email,
         ethos_confirmed_at: new Date().toISOString(),
       })
 

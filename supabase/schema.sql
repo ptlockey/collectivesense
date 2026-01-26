@@ -84,9 +84,14 @@ alter table public.helpful_flags enable row level security;
 
 -- RLS Policies
 
--- Profiles: users can read their own profile, anyone can read contribution counts
+-- Profiles: users can read their own profile, admins can read all
 create policy "Users can view own profile" on public.profiles
   for select using (auth.uid() = id);
+
+create policy "Admins can view all profiles" on public.profiles
+  for select using (
+    exists (select 1 from public.profiles where id = auth.uid() and is_admin = true)
+  );
 
 create policy "Users can update own profile" on public.profiles
   for update using (auth.uid() = id);
@@ -94,19 +99,34 @@ create policy "Users can update own profile" on public.profiles
 create policy "Users can insert own profile" on public.profiles
   for insert with check (auth.uid() = id);
 
+create policy "Admins can delete profiles" on public.profiles
+  for delete using (
+    exists (select 1 from public.profiles where id = auth.uid() and is_admin = true)
+  );
+
 -- Categories: anyone can read
 create policy "Anyone can view categories" on public.categories
   for select using (true);
 
--- Problems: users can read all gathering problems, own problems always
+-- Problems: users can read all gathering problems, own problems always, admins can read all
 create policy "Users can view gathering problems" on public.problems
   for select using (status = 'gathering' or user_id = auth.uid());
+
+create policy "Admins can view all problems" on public.problems
+  for select using (
+    exists (select 1 from public.profiles where id = auth.uid() and is_admin = true)
+  );
 
 create policy "Users can insert own problems" on public.problems
   for insert with check (auth.uid() = user_id);
 
 create policy "Users can update own problems" on public.problems
   for update using (auth.uid() = user_id);
+
+create policy "Admins can delete problems" on public.problems
+  for delete using (
+    exists (select 1 from public.profiles where id = auth.uid() and is_admin = true)
+  );
 
 -- Contributions: users can only see their own (for duplicate check), can insert
 create policy "Users can view own contributions" on public.contributions
@@ -115,13 +135,22 @@ create policy "Users can view own contributions" on public.contributions
 create policy "Users can insert contributions" on public.contributions
   for insert with check (auth.uid() = user_id);
 
--- Syntheses: only problem owner can view
+-- Syntheses: problem owner and contributors can view
 create policy "Problem owner can view synthesis" on public.syntheses
   for select using (
     exists (
       select 1 from public.problems
       where problems.id = syntheses.problem_id
       and problems.user_id = auth.uid()
+    )
+  );
+
+create policy "Contributors can view synthesis" on public.syntheses
+  for select using (
+    exists (
+      select 1 from public.contributions
+      where contributions.problem_id = syntheses.problem_id
+      and contributions.user_id = auth.uid()
     )
   );
 

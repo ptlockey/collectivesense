@@ -14,6 +14,7 @@ interface Problem {
 
 interface User {
   id: string
+  email: string | null
   display_name: string | null
   is_admin: boolean
   contributions_count: number
@@ -150,7 +151,7 @@ export function AdminDashboard({ problems: initialProblems, users: initialUsers 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="font-medium truncate">
-                      {user.display_name || `User ${user.id.slice(0, 8)}...`}
+                      {user.display_name || user.email || `User ${user.id.slice(0, 8)}...`}
                     </p>
                     {user.is_admin && (
                       <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full">
