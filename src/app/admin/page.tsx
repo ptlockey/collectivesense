@@ -24,7 +24,7 @@ export default async function AdminPage() {
   // Fetch all data for admin
   const { data: problems } = await supabase
     .from('problems')
-    .select('*, profiles(id), categories(name)')
+    .select('id, title, status, contribution_count, contribution_threshold, created_at, categories(name)')
     .order('created_at', { ascending: false })
 
   const { data: users } = await supabase

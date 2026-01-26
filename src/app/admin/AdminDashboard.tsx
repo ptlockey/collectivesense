@@ -8,6 +8,7 @@ interface Problem {
   title: string
   status: string
   contribution_count: number
+  contribution_threshold: number
   created_at: string
   categories: { name: string } | null
 }
@@ -32,6 +33,37 @@ export function AdminDashboard({ problems: initialProblems, users: initialUsers 
   const [users, setUsers] = useState(initialUsers)
   const [activeTab, setActiveTab] = useState<'problems' | 'users'>('problems')
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [synthesising, setSynthesising] = useState<string | null>(null)
+
+  const triggerSynthesis = async (id: string) => {
+    if (!confirm('Trigger synthesis for this problem? This will generate the collective wisdom from all contributions.')) {
+      return
+    }
+
+    setSynthesising(id)
+
+    try {
+      const response = await fetch(`/api/synthesise/${id}`, {
+        method: 'POST',
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        // Update local state to reflect the change
+        setProblems(problems.map(p =>
+          p.id === id ? { ...p, status: 'complete' } : p
+        ))
+        alert('Synthesis complete!')
+      } else {
+        alert('Synthesis failed: ' + (result.error || 'Unknown error'))
+      }
+    } catch (error) {
+      alert('Synthesis failed: ' + (error instanceof Error ? error.message : 'Unknown error'))
+    }
+
+    setSynthesising(null)
+  }
 
   const deleteProblem = async (id: string) => {
     if (!confirm('Are you sure you want to delete this problem? This will also delete all contributions and syntheses.')) {
@@ -117,20 +149,33 @@ export function AdminDashboard({ problems: initialProblems, users: initialUsers 
               >
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{problem.title}</p>
-                  <div className="flex gap-4 text-sm text-secondary mt-1">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-secondary mt-1">
                     <span>{problem.categories?.name || 'Uncategorized'}</span>
-                    <span>Status: {problem.status}</span>
-                    <span>{problem.contribution_count} contributions</span>
+                    <span className={problem.status === 'complete' ? 'text-green-600' : problem.status === 'gathering' ? 'text-amber-600' : ''}>
+                      Status: {problem.status}
+                    </span>
+                    <span>{problem.contribution_count}/{problem.contribution_threshold} contributions</span>
                     <span>{new Date(problem.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
-                <button
-                  onClick={() => deleteProblem(problem.id)}
-                  disabled={deleting === problem.id}
-                  className="px-3 py-1.5 text-sm bg-error/10 text-error rounded-lg hover:bg-error/20 transition-colors disabled:opacity-50"
-                >
-                  {deleting === problem.id ? 'Deleting...' : 'Delete'}
-                </button>
+                <div className="flex gap-2">
+                  {problem.status === 'gathering' && (
+                    <button
+                      onClick={() => triggerSynthesis(problem.id)}
+                      disabled={synthesising === problem.id}
+                      className="px-3 py-1.5 text-sm bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors disabled:opacity-50"
+                    >
+                      {synthesising === problem.id ? 'Synthesising...' : 'Synthesise'}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => deleteProblem(problem.id)}
+                    disabled={deleting === problem.id}
+                    className="px-3 py-1.5 text-sm bg-error/10 text-error rounded-lg hover:bg-error/20 transition-colors disabled:opacity-50"
+                  >
+                    {deleting === problem.id ? 'Deleting...' : 'Delete'}
+                  </button>
+                </div>
               </div>
             ))
           )}
