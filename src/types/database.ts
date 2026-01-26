@@ -12,6 +12,7 @@ export type Database = {
       profiles: {
         Row: {
           id: string
+          email: string | null
           display_name: string | null
           ethos_confirmed_at: string | null
           contributions_count: number
@@ -21,6 +22,7 @@ export type Database = {
         }
         Insert: {
           id: string
+          email?: string | null
           display_name?: string | null
           ethos_confirmed_at?: string | null
           contributions_count?: number
@@ -30,6 +32,7 @@ export type Database = {
         }
         Update: {
           id?: string
+          email?: string | null
           display_name?: string | null
           ethos_confirmed_at?: string | null
           contributions_count?: number
