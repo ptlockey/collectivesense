@@ -22,10 +22,12 @@ export default async function RootLayout({
 }>) {
   let user = null
   let isAdmin = false
+  let notifications = { myRequests: 0, myContributions: 0 }
 
   if (DEMO_MODE) {
     // In demo mode, simulate a logged-in user
     user = demoUser
+    notifications = { myRequests: 1, myContributions: 0 } // Demo has one complete problem
   } else {
     const supabase = await createClient()
     const { data } = await supabase.auth.getUser()
@@ -38,6 +40,35 @@ export default async function RootLayout({
         .eq('id', user.id)
         .single()
       isAdmin = profile?.is_admin ?? false
+
+      // Count completed requests (syntheses ready)
+      const { count: requestsCount } = await supabase
+        .from('problems')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('status', 'complete')
+
+      // Count completed contributions (problems user contributed to that are complete)
+      const { data: contributions } = await supabase
+        .from('contributions')
+        .select('problem_id')
+        .eq('user_id', user.id)
+
+      let contributionsCount = 0
+      if (contributions && contributions.length > 0) {
+        const problemIds = contributions.map(c => c.problem_id)
+        const { count } = await supabase
+          .from('problems')
+          .select('*', { count: 'exact', head: true })
+          .in('id', problemIds)
+          .eq('status', 'complete')
+        contributionsCount = count || 0
+      }
+
+      notifications = {
+        myRequests: requestsCount || 0,
+        myContributions: contributionsCount,
+      }
     }
   }
 
@@ -49,7 +80,7 @@ export default async function RootLayout({
             Demo Mode - exploring with sample data
           </div>
         )}
-        <Nav user={user} isAdmin={isAdmin} />
+        <Nav user={user} isAdmin={isAdmin} notifications={notifications} />
         <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
           {children}
         </main>

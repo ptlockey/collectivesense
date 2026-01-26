@@ -8,17 +8,21 @@ import { cn } from '@/lib/utils'
 interface NavProps {
   user: { id: string; email: string } | null
   isAdmin?: boolean
+  notifications?: {
+    myRequests: number
+    myContributions: number
+  }
 }
 
-export function Nav({ user, isAdmin = false }: NavProps) {
+export function Nav({ user, isAdmin = false, notifications }: NavProps) {
   const pathname = usePathname()
 
   const navLinks = user
     ? [
-        { href: '/contribute', label: 'Help Others' },
-        { href: '/submit', label: 'Get Wisdom' },
-        { href: '/my-contributions', label: 'My Contributions' },
-        { href: '/my-problems', label: 'My Requests' },
+        { href: '/contribute', label: 'Help Others', badge: 0 },
+        { href: '/submit', label: 'Get Wisdom', badge: 0 },
+        { href: '/my-contributions', label: 'My Contributions', badge: notifications?.myContributions || 0 },
+        { href: '/my-problems', label: 'My Requests', badge: notifications?.myRequests || 0 },
       ]
     : []
 
@@ -48,13 +52,18 @@ export function Nav({ user, isAdmin = false }: NavProps) {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  'px-3 py-2 text-sm rounded-md transition-colors',
+                  'px-3 py-2 text-sm rounded-md transition-colors relative',
                   pathname === link.href
                     ? 'bg-accent text-primary font-medium'
                     : 'text-secondary hover:text-foreground hover:bg-muted'
                 )}
               >
                 {link.label}
+                {link.badge > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs rounded-full flex items-center justify-center font-medium">
+                    {link.badge > 9 ? '9+' : link.badge}
+                  </span>
+                )}
               </Link>
             ))}
 
