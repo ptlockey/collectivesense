@@ -15,6 +15,7 @@ export const demoCategories: Category[] = [
 
 export const demoProfile: Profile = {
   id: 'demo-user',
+  email: 'demo@example.com',
   display_name: 'Demo User',
   ethos_confirmed_at: new Date().toISOString(),
   contributions_count: 12,
