@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { synthesiseContributions } from '@/lib/claude'
 import { checkRateLimit, getClientIdentifier, rateLimits } from '@/lib/rate-limit'
 import { NextResponse } from 'next/server'
@@ -41,8 +42,11 @@ export async function POST(
     }
   }
 
+  // Use admin client to bypass RLS for reading all contributions
+  const adminClient = createAdminClient()
+
   // Fetch problem
-  const { data: problem, error: problemError } = await supabase
+  const { data: problem, error: problemError } = await adminClient
     .from('problems')
     .select('*, categories(name)')
     .eq('id', problemId)
@@ -64,20 +68,20 @@ export async function POST(
   }
 
   // Update status to synthesising
-  await supabase
+  await adminClient
     .from('problems')
     .update({ status: 'synthesising' })
     .eq('id', problemId)
 
-  // Fetch contributions
-  const { data: contributions } = await supabase
+  // Fetch contributions (admin client bypasses RLS to see all contributions)
+  const { data: contributions } = await adminClient
     .from('contributions')
     .select('content')
     .eq('problem_id', problemId)
     .eq('flagged_harmful', false)
 
   if (!contributions || contributions.length === 0) {
-    await supabase
+    await adminClient
       .from('problems')
       .update({ status: 'gathering' })
       .eq('id', problemId)
@@ -104,7 +108,7 @@ export async function POST(
     )
 
     // Store synthesis
-    const { error: synthesisError } = await supabase.from('syntheses').insert({
+    const { error: synthesisError } = await adminClient.from('syntheses').insert({
       problem_id: problemId,
       summary: synthesis.summary,
       common_themes: synthesis.common_themes,
@@ -119,7 +123,7 @@ export async function POST(
     }
 
     // Update problem status
-    await supabase
+    await adminClient
       .from('problems')
       .update({ status: 'complete', updated_at: new Date().toISOString() })
       .eq('id', problemId)
@@ -129,7 +133,7 @@ export async function POST(
     console.error('Synthesis error:', error)
 
     // Revert status
-    await supabase
+    await adminClient
       .from('problems')
       .update({ status: 'gathering' })
       .eq('id', problemId)
