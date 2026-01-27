@@ -135,7 +135,16 @@ create policy "Users can view own contributions" on public.contributions
 create policy "Users can insert contributions" on public.contributions
   for insert with check (auth.uid() = user_id);
 
--- Syntheses: problem owner and contributors can view
+-- Syntheses: anyone can view completed syntheses, owner and contributors can view any
+create policy "Anyone can view completed syntheses" on public.syntheses
+  for select using (
+    exists (
+      select 1 from public.problems
+      where problems.id = syntheses.problem_id
+      and problems.status = 'complete'
+    )
+  );
+
 create policy "Problem owner can view synthesis" on public.syntheses
   for select using (
     exists (

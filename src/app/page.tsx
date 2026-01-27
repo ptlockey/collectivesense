@@ -3,6 +3,9 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { DEMO_MODE, demoProfile, demoProblems, demoUser } from '@/lib/demo-data'
 
+// Disable caching to ensure fresh data on each navigation
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   if (DEMO_MODE) {
     // In demo mode, show dashboard with demo data
