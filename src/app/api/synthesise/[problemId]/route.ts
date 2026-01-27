@@ -43,7 +43,16 @@ export async function POST(
   }
 
   // Use admin client to bypass RLS for reading all contributions
-  const adminClient = createAdminClient()
+  let adminClient
+  try {
+    adminClient = createAdminClient()
+  } catch (error) {
+    console.error('Failed to create admin client:', error)
+    return NextResponse.json(
+      { error: 'Server configuration error - missing SUPABASE_SERVICE_ROLE_KEY' },
+      { status: 500 }
+    )
+  }
 
   // Fetch problem
   const { data: problem, error: problemError } = await adminClient

@@ -26,6 +26,7 @@ Environment variables are managed in **TWO places**:
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://qdqcfgvmsdysryverfyj.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<supabase-anon-key>
+SUPABASE_SERVICE_ROLE_KEY=<supabase-service-role-key>  # For synthesis API (bypasses RLS)
 NEXT_PUBLIC_SITE_URL=https://collectivesense.co.uk
 ANTHROPIC_API_KEY=<anthropic-api-key>
 INTERNAL_API_SECRET=<secure-random-string>
