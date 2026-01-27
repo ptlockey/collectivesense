@@ -473,10 +473,10 @@ async function Dashboard({ userId, isDemo }: { userId: string; isDemo: boolean }
         </div>
       )}
 
-      {/* Syntheses ready */}
+      {/* Wisdom ready */}
       {completedProblems && completedProblems.length > 0 && (
         <div>
-          <h2 className="text-xl font-medium mb-4">Syntheses ready</h2>
+          <h2 className="text-xl font-medium mb-4">Wisdom ready</h2>
           <div className="space-y-3">
             {completedProblems.map((problem) => (
               <Link
@@ -487,7 +487,7 @@ async function Dashboard({ userId, isDemo }: { userId: string; isDemo: boolean }
                 <p className="font-medium mb-1">{problem.title}</p>
                 <p className="text-sm text-success flex items-center gap-2">
                   <span className="w-2 h-2 bg-success rounded-full"></span>
-                  Synthesis ready to view
+                  Wisdom ready to view
                 </p>
               </Link>
             ))}

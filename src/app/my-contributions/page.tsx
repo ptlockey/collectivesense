@@ -195,7 +195,7 @@ export default function MyContributionsPage() {
                           ? 'bg-success/10 text-success'
                           : 'bg-warning/10 text-warning'
                       }`}>
-                        {isComplete ? 'Synthesis ready' : `${contribution.problem.contribution_count}/${contribution.problem.contribution_threshold} contributions`}
+                        {isComplete ? 'Wisdom ready' : `${contribution.problem.contribution_count}/${contribution.problem.contribution_threshold} contributions`}
                       </span>
                     </div>
                     <h2 className="font-medium">{contribution.problem.title}</h2>

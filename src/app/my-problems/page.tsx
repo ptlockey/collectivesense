@@ -102,7 +102,7 @@ export default async function MyProblemsPage() {
 
                 {problem.status === 'synthesising' && (
                   <p className="text-sm text-warning">
-                    Creating synthesis...
+                    Creating wisdom...
                   </p>
                 )}
 
@@ -111,7 +111,7 @@ export default async function MyProblemsPage() {
                     href={`/problems/${problem.id}/synthesis`}
                     className="inline-block text-sm text-success hover:text-success/80"
                   >
-                    View synthesis
+                    View wisdom
                   </Link>
                 )}
 
